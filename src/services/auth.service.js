@@ -28,34 +28,24 @@ const getCurrentUser = async () => {
 };
 
 // Placeholder stubs for unimplemented flows to avoid runtime errors
-const forgotPassword = async (_data) => {
-  return { message: "If an account exists, a reset link was sent." };
+
+
+const verifyResetOtp = async (data) => {
+  return api.post("/auth/verify-reset-otp", data);
 };
 
-const resetPassword = async (_token, _data) => {
-  return { message: "Password reset is not enabled in this build." };
+const forgotPassword = async (data) => {
+  return api.post("/auth/forgot-password", data);
 };
 
-const updatePassword = async (_data) => {
-  return { message: "Update password is not enabled in this build." };
-};
-
-const verifyEmail = async (_data) => {
-  return { message: "Email verification is not required." };
-};
-
-const verifyPhone = async (_data) => {
-  return { message: "Phone verification is not required." };
-};
 
 export default {
   login,
   register,
   logout,
   getCurrentUser,
+  verifyResetOtp,
   forgotPassword,
-  resetPassword,
-  updatePassword,
-  verifyEmail,
-  verifyPhone,
+  
+  
 };

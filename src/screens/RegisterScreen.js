@@ -15,18 +15,29 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import authService from "../services/auth.service";
 import getErrorMessage from "../utils/errorHandler";
-
+import { Animated } from "react-native";
+import { Feather } from "@expo/vector-icons";
+import { Picker } from "@react-native-picker/picker";
+import AppText from "../components/AppText";
+import { fonts } from "../themes/typography";
 const { width } = Dimensions.get('window');
 
 export default function RegisterScreen({ navigation }) {
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     email: "",
     password: "",
+    confirmPassword: "",
     phone: "",
+    countryCode: "+91",
   });
+
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [focusedInput, setFocusedInput] = useState(null);
 
   const handleChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -60,10 +71,15 @@ export default function RegisterScreen({ navigation }) {
       Alert.alert("Validation Error", "Please enter a password.");
       return;
     }
+    if (password !== formData.confirmPassword) {
+      Alert.alert("Validation Error", "Passwords do not match.");
+      return;
+    }
     if (password.length < 6) {
       Alert.alert("Validation Error", "Password must be at least 6 characters long.");
       return;
     }
+
 
     setLoading(true);
     try {
@@ -72,19 +88,22 @@ export default function RegisterScreen({ navigation }) {
       navigation.replace("Home");
     } catch (error) {
       const friendlyMessage = getErrorMessage(error);
-      Alert.alert("Registration Error", friendlyMessage);
+      Alert.alert("Registration Error", friendlyMessage,error.message);
     } finally {
       setLoading(false);
     }
   };
 
+  const inputBorder = (field) => ({
+    borderColor: focusedInput === field ? "#0F2E73" : "rgba(255,255,255,0.4)",
+    borderWidth: 1,
+  });
+
+
+
   return (
-    <LinearGradient
-      colors={['#1E3A8A', '#3B82F6', '#60A5FA']}
-      style={styles.gradient}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-    >
+
+    <View style={{ flex: 1, backgroundColor: "#F5F7FB" }}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.keyboardView}
@@ -92,19 +111,30 @@ export default function RegisterScreen({ navigation }) {
         <ScrollView
           contentContainerStyle={styles.scrollContainer}
           showsVerticalScrollIndicator={false}
+          bounces={false}
         >
-          <View style={styles.header}>
-            <Text style={styles.emoji}>🚚</Text>
-            <Text style={styles.title}>Create account</Text>
-            <Text style={styles.subtitle}>Join VCG Transport today</Text>
-          </View>
+          <LinearGradient
+            colors={['#1E3A8A', '#2563EB']}
+            style={styles.topSection}
+          >
+            <View style={styles.header}>
+              <View style={styles.iconWrapper}>
+                <Feather name="truck" size={32} color="#1E3A8A" />
+              </View>
+              <AppText weight="bold" style={styles.title}>Create account</AppText>
+              <AppText weight="semiBold" style={styles.subtitle}>Join VCG Transport today</AppText>
+            </View>
 
-          <View style={styles.formContainer}>
+          </LinearGradient>
+
+          <View style={styles.card}>
             <View style={{ flexDirection: 'row', gap: 12 }}>
               <View style={[styles.inputContainer, { flex: 1 }]}>
-                <Text style={styles.label}>First Name</Text>
+                <AppText weight="semiBold" style={styles.label}>First Name</AppText>
                 <TextInput
-                  style={styles.input}
+                  onFocus={() => setFocusedInput("firstName")}
+                  onBlur={() => setFocusedInput(null)}
+                  style={[styles.input, inputBorder("firstName")]}
                   placeholder="John"
                   placeholderTextColor="#999"
                   value={formData.firstName}
@@ -113,9 +143,11 @@ export default function RegisterScreen({ navigation }) {
                 />
               </View>
               <View style={[styles.inputContainer, { flex: 1 }]}>
-                <Text style={styles.label}>Last Name</Text>
+                <AppText weight="semiBold" style={styles.label}>Last Name</AppText>
                 <TextInput
-                  style={styles.input}
+                  onFocus={() => setFocusedInput("lastName")}
+                  onBlur={() => setFocusedInput(null)}
+                  style={[styles.input, inputBorder("lastName")]}
                   placeholder="Doe"
                   placeholderTextColor="#999"
                   value={formData.lastName}
@@ -126,9 +158,11 @@ export default function RegisterScreen({ navigation }) {
             </View>
 
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Email</Text>
+              <AppText weight="semiBold" style={styles.label}>Email</AppText>
               <TextInput
-                style={styles.input}
+                onFocus={() => setFocusedInput("email")}
+                onBlur={() => setFocusedInput(null)}
+                style={[styles.input, inputBorder("email")]}
                 placeholder="Enter your email"
                 placeholderTextColor="#999"
                 value={formData.email}
@@ -140,61 +174,140 @@ export default function RegisterScreen({ navigation }) {
             </View>
 
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Phone</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter your phone number"
-                placeholderTextColor="#999"
-                value={formData.phone}
-                onChangeText={(value) => handleChange("phone", value)}
-                keyboardType="phone-pad"
-                editable={!loading}
-              />
+              <AppText weight="semiBold" style={styles.label}>Phone</AppText>
+
+              <View style={styles.phoneRow}>
+                <View style={styles.countryPicker}>
+                  <Picker
+                    selectedValue={formData.countryCode}
+                    onValueChange={(value) => handleChange("countryCode", value)}
+                    style={{ height: 50, fontFamily: fonts.regular }}
+                    dropdownIconColor="#1E3A8A"
+                  >
+                    <Picker.Item label="+91 (India)" value="+91" />
+                    <Picker.Item label="+1 (USA)" value="+1" />
+                    <Picker.Item label="+971 (UAE)" value="+971" />
+                  </Picker>
+                </View>
+
+                <TextInput
+                  onFocus={() => setFocusedInput("phone")}
+                  onBlur={() => setFocusedInput(null)}
+                  style={[styles.input, { flex: 1 }, inputBorder("phone")]}
+                  placeholder="Phone number"
+                  keyboardType="phone-pad"
+                  value={formData.phone}
+                  onChangeText={(value) => handleChange("phone", value)}
+
+                />
+              </View>
             </View>
 
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Password</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Create a password"
-                placeholderTextColor="#999"
-                value={formData.password}
-                onChangeText={(value) => handleChange("password", value)}
-                secureTextEntry
-                editable={!loading}
-              />
+              <AppText weight="semiBold" style={styles.label}>Password</AppText>
+
+              <View style={styles.passwordContainer}>
+                <TextInput
+                  style={[styles.input, { flex: 1 }, inputBorder("password")]}
+                  placeholder="Create a password"
+                  secureTextEntry={!showPassword}
+                  value={formData.password}
+                  onChangeText={(value) => handleChange("password", value)}
+                  onFocus={() => setFocusedInput("password")}
+                  onBlur={() => setFocusedInput(null)}
+                />
+
+                <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                  <Feather
+                    name={showPassword ? "eye-off" : "eye"}
+                    size={20}
+                    color="#1E3A8A"
+                  />
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <View style={styles.inputContainer}>
+              <AppText weight="semiBold" style={styles.label}>Confirm Password</AppText>
+
+              <View style={styles.passwordContainer}>
+                <TextInput
+                  style={[styles.input, { flex: 1 }, inputBorder("confirmPassword")]}
+                  placeholder="Confirm password"
+                  secureTextEntry={!showConfirmPassword}
+                  value={formData.confirmPassword}
+                  onChangeText={(value) => handleChange("confirmPassword", value)}
+                  onFocus={() => setFocusedInput("confirmPassword")}
+                  onBlur={() => setFocusedInput(null)}
+                />
+
+                <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
+                  <Feather
+                    name={showConfirmPassword ? "eye-off" : "eye"}
+                    size={20}
+                    color="#1E3A8A"
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
 
             <TouchableOpacity
-              style={[styles.button, loading && styles.buttonDisabled]}
-              onPress={handleRegister}
               disabled={loading}
-              activeOpacity={0.8}
+              onPress={handleRegister}
+              activeOpacity={0.9}
             >
-              {loading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.buttonText}>Create Account</Text>
-              )}
+              <LinearGradient
+                colors={['#1E3A8A', '#2563EB']}
+                style={styles.button}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <AppText weight="bold" style={styles.buttonText}>
+                    Create Account
+                  </AppText>
+                )}
+              </LinearGradient>
             </TouchableOpacity>
 
             <View style={styles.footer}>
-              <Text style={styles.footerText}>Already have an account?</Text>
+              <AppText weight="semiBold" style={styles.footerText}>Already have an account?</AppText>
               <TouchableOpacity
                 onPress={() => navigation.navigate("Login")}
                 disabled={loading}
               >
-                <Text style={styles.linkText}>Sign in</Text>
+                <AppText weight="semiBold" style={styles.linkText}>Sign in</AppText>
               </TouchableOpacity>
             </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </LinearGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  phoneRow: {
+    flexDirection: "row",
+    gap: 8,
+  },
+
+  countryPicker: {
+    backgroundColor: "#fff",
+    borderRadius: 14,
+    width: 120,
+    
+    justifyContent: "center",
+    fontFamily: fonts.regular,
+  },
+
+  passwordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    borderRadius: 14,
+    paddingHorizontal: 14,
+  },
   gradient: {
     flex: 1,
   },
@@ -203,23 +316,45 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     flexGrow: 1,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingBottom: 40,
+    justifyContent: "center",
   },
   header: {
-    marginTop: 60,
-    marginBottom: 32,
+    marginTop: 80,
+    marginBottom: 40,
+    alignItems: "center",
+  },
+  topSection: {
+    paddingTop: 100,
+    paddingBottom: 60,
+    alignItems: "center",
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+  },
+
+  card: {
+    backgroundColor: "#fff",
+    marginTop: -40,
+    marginHorizontal: 20,
+    borderRadius: 20,
+    padding: 24,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 8,
   },
   emoji: {
     fontSize: 48,
     marginBottom: 24,
   },
   title: {
-    fontSize: 36,
-    fontWeight: "700",
+    fontSize: 30,
+    fontWeight: "600",
     color: "#fff",
-    marginBottom: 8,
-    letterSpacing: -0.5,
+    marginBottom: 6,
+
   },
   subtitle: {
     fontSize: 16,
@@ -240,54 +375,44 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
   },
   input: {
-    backgroundColor: "rgba(255, 255, 255, 0.95)",
-    borderRadius: 16,
-    padding: 18,
-    fontSize: 16,
+    backgroundColor: "#F8FAFC",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    padding:20,
+    fontSize: 15,
     color: "#1E3A8A",
-    borderWidth: 0,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
+    fontFamily: fonts.regular,
   },
-  button: {
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: 18,
-    alignItems: "center",
-    marginTop: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
-    elevation: 5,
-  },
+ button: {
+  borderRadius: 14,
+  paddingVertical: 16,
+  alignItems: "center",
+  marginTop: 20,
+},
   buttonDisabled: {
     backgroundColor: "rgba(255, 255, 255, 0.5)",
     shadowOpacity: 0,
   },
   buttonText: {
-    color: "#1E3A8A",
-    fontSize: 17,
+    color: "#fff",
+    fontSize: 16,
     fontWeight: "700",
-    letterSpacing: 0.5,
   },
   footer: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 32,
+    marginTop: 28,
   },
   footerText: {
-    color: "rgba(255, 255, 255, 0.8)",
-    fontSize: 15,
+    color: "rgba(3, 0, 152, 0.8)",
+    fontSize: 13,
     marginRight: 6,
   },
   linkText: {
-    color: "#fff",
-    fontSize: 15,
+    color: "#900101",
+    fontSize: 13,
     fontWeight: "700",
     textDecorationLine: "underline",
   },

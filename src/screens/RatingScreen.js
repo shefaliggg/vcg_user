@@ -10,6 +10,9 @@ import {
   ScrollView,
 } from "react-native";
 import ratingService from "../services/rating.service";
+import { LinearGradient } from "expo-linear-gradient";
+import AppText from "../components/AppText";
+import { Feather } from "@expo/vector-icons";
 
 export default function RatingScreen({ route, navigation }) {
   const { tripId, driverId } = route.params || {};
@@ -48,156 +51,185 @@ export default function RatingScreen({ route, navigation }) {
     }
   };
 
+
+
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.innerContainer}>
-        <Text style={styles.title}>Rate Your Experience</Text>
-        <Text style={styles.subtitle}>
-          How was your experience with this trip?
-        </Text>
-
-        <View style={styles.ratingContainer}>
-          {[1, 2, 3, 4, 5].map((star) => (
-            <TouchableOpacity
-              key={star}
-              onPress={() => handleRatingPress(star)}
-              disabled={loading}
-            >
-              <Text style={styles.star}>{star <= rating ? "⭐" : "☆"}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        <Text style={styles.ratingText}>
-          {rating === 0
-            ? "Tap to rate"
-            : rating === 1
-            ? "Poor"
-            : rating === 2
-            ? "Fair"
-            : rating === 3
-            ? "Good"
-            : rating === 4
-            ? "Very Good"
-            : "Excellent"}
-        </Text>
-
-        <Text style={styles.label}>Additional Comments (Optional)</Text>
-        <TextInput
-          style={styles.textArea}
-          placeholder="Share your experience..."
-          placeholderTextColor="#999"
-          value={comment}
-          onChangeText={setComment}
-          multiline
-          numberOfLines={6}
-          editable={!loading}
-        />
-
+    <LinearGradient
+      colors={["#1E3A8A", "#2563EB"]}
+      style={{ flex: 1 }}
+    >
+      {/* Header */}
+      <View style={styles.header}>
         <TouchableOpacity
-          style={[styles.button, loading && styles.buttonDisabled]}
-          onPress={handleSubmit}
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
           disabled={loading}
         >
-          {loading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.buttonText}>Submit Rating</Text>
-          )}
+          <Feather name="arrow-left" size={22} color="#fff" />
         </TouchableOpacity>
+
+        <AppText weight="bold" style={styles.headerTitle}>
+          Sign Confirmation
+        </AppText>
+
+        <View style={{ width: 40 }} />
+      </View>
+
+      {/* White Card */}
+      <View style={styles.card}>
+
+        <AppText weight="bold" style={styles.title}>
+          Rate Confirmation
+        </AppText>
+
+        <AppText style={styles.subtitle}>
+          Please sign below to accept the rate agreement
+        </AppText>
+
+        {/* Signature Area */}
+        <View style={styles.signatureContainer}>
+          <SignatureCanvas
+            ref={signatureRef}
+            onOK={handleSignature}
+            onEmpty={() => Alert.alert("Error", "Please provide a signature")}
+            descriptionText=""
+            clearText="Clear"
+            confirmText="Confirm"
+            webStyle={`
+            .m-signature-pad { box-shadow: none; border: none; }
+            .m-signature-pad--body { border: none; }
+            .m-signature-pad--footer { display: none; }
+          `}
+          />
+        </View>
+
+        {/* Buttons */}
+        <View style={styles.buttonRow}>
+          <TouchableOpacity
+            style={styles.clearButton}
+            onPress={handleClear}
+            disabled={loading}
+          >
+            <AppText weight="semiBold" style={styles.clearText}>
+              Clear
+            </AppText>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.confirmButton, loading && styles.disabled]}
+            onPress={handleConfirm}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <AppText weight="bold" style={styles.confirmText}>
+                Sign & Submit
+              </AppText>
+            )}
+          </TouchableOpacity>
+        </View>
 
         <TouchableOpacity
           style={styles.cancelButton}
           onPress={() => navigation.goBack()}
           disabled={loading}
         >
-          <Text style={styles.cancelButtonText}>Cancel</Text>
+          <AppText style={styles.cancelText}>Cancel</AppText>
         </TouchableOpacity>
+
       </View>
-    </ScrollView>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  header: {
+    marginTop: 60,
+    paddingHorizontal: 24,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  headerTitle: {
+    color: "#fff",
+    fontSize: 18,
+  },
+
+  card: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    marginTop: 40,
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    padding: 24,
   },
-  innerContainer: {
-    padding: 20,
-  },
+
   title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginTop: 20,
-    marginBottom: 10,
-    color: "#333",
+    fontSize: 18,
+    color: "#1E293B",
+    marginBottom: 6,
   },
   subtitle: {
-    fontSize: 16,
-    textAlign: "center",
-    color: "#666",
-    marginBottom: 30,
-  },
-  ratingContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginBottom: 15,
-  },
-  star: {
-    fontSize: 50,
-    marginHorizontal: 5,
-  },
-  ratingText: {
-    fontSize: 18,
-    textAlign: "center",
-    fontWeight: "600",
-    color: "#2196F3",
-    marginBottom: 30,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#333",
-    marginBottom: 10,
-  },
-  textArea: {
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    padding: 15,
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    height: 120,
-    textAlignVertical: "top",
+    color: "#64748B",
     marginBottom: 20,
   },
-  button: {
-    backgroundColor: "#2196F3",
-    borderRadius: 8,
-    padding: 15,
-    alignItems: "center",
-  },
-  buttonDisabled: {
-    backgroundColor: "#ccc",
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  cancelButton: {
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    padding: 15,
-    alignItems: "center",
-    marginTop: 10,
+
+  signatureContainer: {
+    flex: 1,
+    borderRadius: 16,
+    overflow: "hidden",
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: "#E2E8F0",
+    backgroundColor: "#F8FAFC",
   },
-  cancelButtonText: {
-    color: "#666",
-    fontSize: 16,
+
+  buttonRow: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 20,
+  },
+
+  clearButton: {
+    flex: 1,
+    paddingVertical: 16,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "#EF4444",
+    alignItems: "center",
+  },
+  clearText: {
+    color: "#EF4444",
+  },
+
+  confirmButton: {
+    flex: 1,
+    backgroundColor: "#1E3A8A",
+    paddingVertical: 16,
+    borderRadius: 14,
+    alignItems: "center",
+  },
+  confirmText: {
+    color: "#fff",
+  },
+
+  cancelButton: {
+    marginTop: 16,
+    alignItems: "center",
+  },
+  cancelText: {
+    color: "#64748B",
+  },
+
+  disabled: {
+    opacity: 0.6,
   },
 });

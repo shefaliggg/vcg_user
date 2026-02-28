@@ -1,22 +1,22 @@
 import api from "./api.service";
 
-const createRating = async (data) => {
-  const res = await api.post("/ratings", data);
+const submitRating = async (tripId, rating, comment) => {
+  const res = await api.post("/ratings", {
+    tripId,
+    rating,
+    comment,
+  });
+
   return res.data;
 };
 
-const getMyRatings = async () => {
-  const res = await api.get("/ratings/my");
-  return res.data;
-};
-
-const getRatingById = async (id) => {
-  const res = await api.get(`/ratings/${id}`);
-  return res.data;
-};
+// ✅ Check If Already Rated
+const checkIfRated = async (tripId) => {
+  const response = await api.get(`/ratings/check/${tripId}`);
+  return response.data;
+}
 
 export default {
-  createRating,
-  getMyRatings,
-  getRatingById,
+  submitRating,
+  checkIfRated,
 };

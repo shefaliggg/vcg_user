@@ -13,11 +13,13 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import authService from '../services/auth.service';
 import userService from '../services/user.service';
+import AppText from '../components/AppText';
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+ 
 
   const loadUserData = async () => {
     try {
@@ -80,86 +82,109 @@ const ProfileScreen = () => {
       </View>
     );
   }
+return (
+  <ScrollView
+    style={styles.container}
+    contentContainerStyle={{ paddingBottom: 40 }}
+    showsVerticalScrollIndicator={false}
+  >
+    <View style={styles.header}>
+      <View style={styles.avatarContainer}>
+        <Icon name="person" size={60} color="#fff" />
+      </View>
+      <AppText weight="bold" style={styles.nameText}>
+        {user?.firstName} {user?.lastName}
+      </AppText>
+      <AppText weight="semiBold" style={styles.emailText}>
+        {user?.email}
+      </AppText>
+    </View>
 
-  return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.avatarContainer}>
-          <Icon name="person" size={60} color="#fff" />
-        </View>
-        <Text style={styles.nameText}>
-          {user?.firstName} {user?.lastName}
+    <View style={styles.section}>
+      <AppText weight="bold" style={styles.sectionTitle}>
+        Personal Information
+      </AppText>
+
+      <View style={styles.infoRow}>
+        <AppText weight="semiBold" style={styles.label}>
+          First Name
+        </AppText>
+        <Text style={styles.value}>{user?.firstName || "N/A"}</Text>
+      </View>
+
+      <View style={styles.infoRow}>
+        <AppText weight="semiBold" style={styles.label}>
+          Last Name
+        </AppText>
+        <Text style={styles.value}>{user?.lastName || "N/A"}</Text>
+      </View>
+
+      <View style={styles.infoRow}>
+        <AppText weight="semiBold" style={styles.label}>
+          Email
+        </AppText>
+        <Text style={styles.value}>{user?.email || "N/A"}</Text>
+      </View>
+
+      <View style={styles.infoRow}>
+        <AppText weight="semiBold" style={styles.label}>
+          Phone
+        </AppText>
+        <Text style={styles.value}>{user?.phone || "N/A"}</Text>
+      </View>
+
+      <View style={styles.infoRow}>
+        <AppText weight="semiBold" style={styles.label}>
+          Company Name
+        </AppText>
+        <Text style={styles.value}>
+          {user?.companyProfile?.companyName || "N/A"}
         </Text>
-        <Text style={styles.emailText}>{user?.email}</Text>
       </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Personal Information</Text>
-        
-        <View style={styles.infoRow}>
-          <Text style={styles.label}>First Name</Text>
-          <Text style={styles.value}>{user?.firstName || 'N/A'}</Text>
-        </View>
-
-        <View style={styles.infoRow}>
-          <Text style={styles.label}>Last Name</Text>
-          <Text style={styles.value}>{user?.lastName || 'N/A'}</Text>
-        </View>
-
-        <View style={styles.infoRow}>
-          <Text style={styles.label}>Email</Text>
-          <Text style={styles.value}>{user?.email || 'N/A'}</Text>
-        </View>
-
-        <View style={styles.infoRow}>
-          <Text style={styles.label}>Phone</Text>
-          <Text style={styles.value}>{user?.phone || 'N/A'}</Text>
-        </View>
-
-        <View style={styles.infoRow}>
-          <Text style={styles.label}>Company Name</Text>
-          <Text style={styles.value}>{user?.companyName || 'N/A'}</Text>
-        </View>
-
-        <View style={styles.infoRow}>
-          <Text style={styles.label}>GST Number</Text>
-          <Text style={styles.value}>{user?.gstNumber || 'N/A'}</Text>
-        </View>
+      <View style={[styles.infoRow, { borderBottomWidth: 0 }]}>
+        <AppText weight="semiBold" style={styles.label}>
+          GST Number
+        </AppText>
+        <Text style={styles.value}>
+          {user?.companyProfile?.gstNumber || "N/A"}
+        </Text>
       </View>
+    </View>
 
-      <View style={styles.buttonSection}>
-        <TouchableOpacity
-          style={styles.editButton}
-          onPress={() => navigation.navigate('EditProfile')}
-        >
-          <Icon name="edit" size={20} color="#fff" style={styles.buttonIcon} />
-          <Text style={styles.editButtonText}>Edit Profile</Text>
-        </TouchableOpacity>
+    <View style={styles.buttonSection}>
+      <TouchableOpacity
+        style={styles.editButton}
+        onPress={() => navigation.navigate("EditProfile")}
+      >
+        <Icon name="edit" size={20} color="#fff" style={styles.buttonIcon} />
+        <Text style={styles.editButtonText}>Edit Profile</Text>
+      </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.passwordButton}
-          onPress={() => navigation.navigate('ChangePassword')}
-        >
-          <Icon name="lock" size={20} color="#7b2ff2" style={styles.buttonIcon} />
-          <Text style={styles.passwordButtonText}>Change Password</Text>
-        </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.passwordButton}
+        onPress={() => navigation.navigate("ChangePassword")}
+      >
+        <Icon name="lock" size={20} color="#1E3A8A" style={styles.buttonIcon} />
+        <Text style={styles.passwordButtonText}>Change Password</Text>
+      </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.logoutButton}
-          onPress={handleLogout}
-        >
-          <Icon name="logout" size={20} color="#FF3B30" style={styles.buttonIcon} />
-          <Text style={styles.logoutButtonText}>Logout</Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
-  );
+      <TouchableOpacity
+        style={styles.logoutButton}
+        onPress={handleLogout}
+      >
+        <Icon name="logout" size={20} color="#DC2626" style={styles.buttonIcon} />
+        <Text style={styles.logoutButtonText}>Logout</Text>
+      </TouchableOpacity>
+    </View>
+  </ScrollView>
+);
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#F6F7FB',
   },
   loadingContainer: {
     flex: 1,
@@ -168,70 +193,87 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5F5F5',
   },
   header: {
-    backgroundColor: '#7b2ff2',
-    paddingVertical: 40,
-    alignItems: 'center',
+    backgroundColor: "#1E3A8A",
+    paddingTop: 70,
+    paddingBottom: 30,
+    alignItems: "center",
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
   },
   avatarContainer: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: 'rgba(255,255,255,0.3)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    justifyContent: "center",
+    alignItems: "center",
     marginBottom: 16,
   },
   nameText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
+    fontSize: 22,
+    fontWeight: "600",
+    color: "#fff",
     marginBottom: 4,
   },
+
   emailText: {
-    fontSize: 14,
-    color: 'rgba(255,255,255,0.8)',
+    fontSize: 13,
+    color: "rgba(255,255,255,0.85)",
   },
   section: {
-    backgroundColor: '#fff',
-    marginTop: 16,
-    paddingVertical: 16,
+    backgroundColor: "#fff",
+    marginHorizontal: 16,
+    marginTop: 20,
+    borderRadius: 16,
+    paddingVertical: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#111827",
     paddingHorizontal: 16,
-    marginBottom: 16,
+    marginBottom: 12,
   },
   infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
+    borderBottomColor: "#F0F2F5",
   },
   label: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: 13,
+    color: "#6B7280",
   },
+
   value: {
     fontSize: 14,
-    fontWeight: '500',
-    color: '#333',
+    fontWeight: "600",
+    color: "#111827",
   },
   buttonSection: {
     paddingHorizontal: 16,
     paddingVertical: 24,
   },
   editButton: {
-    backgroundColor: '#7b2ff2',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 14,
-    borderRadius: 8,
-    marginBottom: 12,
+    backgroundColor: "#1E3A8A",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 16,
+    borderRadius: 14,
+    marginBottom: 14,
+    shadowColor: "#1E3A8A",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
   },
   buttonIcon: {
     marginRight: 8,
@@ -242,36 +284,37 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   passwordButton: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderWidth: 1,
-    borderColor: '#7b2ff2',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 14,
-    borderRadius: 8,
-    marginBottom: 12,
+    borderColor: "#1E3A8A",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 16,
+    borderRadius: 14,
+    marginBottom: 14,
   },
   passwordButtonText: {
-    color: '#7b2ff2',
-    fontSize: 16,
-    fontWeight: '600',
+    color: "#1E3A8A",
+    fontSize: 15,
+    fontWeight: "600",
   },
   logoutButton: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderWidth: 1,
-    borderColor: '#FF3B30',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 14,
-    borderRadius: 8,
+    borderColor: "#DC2626",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 16,
+    borderRadius: 14,
   },
   logoutButtonText: {
-    color: '#FF3B30',
-    fontSize: 16,
-    fontWeight: '600',
+    color: "#DC2626",
+    fontSize: 15,
+    fontWeight: "600",
   },
+
 });
 
 export default ProfileScreen;

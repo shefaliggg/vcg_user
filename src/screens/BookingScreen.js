@@ -14,6 +14,8 @@ import {
 import bookingService from "../services/booking.service";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import { GOOGLE_MAPS_API_KEY } from "../utils/googleMaps";
+import AppText from "../components/AppText";
+import { fonts } from "../themes/typography";
 
 export default function BookingScreen({ navigation }) {
   const [formData, setFormData] = useState({
@@ -185,161 +187,161 @@ export default function BookingScreen({ navigation }) {
         renderItem={() => (
           <View style={styles.innerContainer}>
 
-          <Text style={styles.label}>Shipper Name *</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter shipper name"
-            placeholderTextColor="#999"
-            value={formData.shipper.name}
-            onChangeText={(value) => handleChange("shipper.name", value)}
-            editable={!loading}
-          />
+            <AppText weight="semiBold" style={styles.label}>Shipper Name *</AppText>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter shipper name"
+              placeholderTextColor="#999"
+              value={formData.shipper.name}
+              onChangeText={(value) => handleChange("shipper.name", value)}
+              editable={!loading}
+            />
 
-          <Text style={styles.label}>Shipper Phone *</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter shipper phone number"
-            placeholderTextColor="#999"
-            value={formData.shipper.phone}
-            onChangeText={(value) => handleChange("shipper.phone", value)}
-            keyboardType="phone-pad"
-            editable={!loading}
-          />
+            <AppText weight="semiBold" style={styles.label}>Shipper Phone *</AppText>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter shipper phone number"
+              placeholderTextColor="#999"
+              value={formData.shipper.phone}
+              onChangeText={(value) => handleChange("shipper.phone", value)}
+              keyboardType="phone-pad"
+              editable={!loading}
+            />
 
-          <Text style={styles.label}>Consignee Name *</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter consignee name"
-            placeholderTextColor="#999"
-            value={formData.consignee.name}
-            onChangeText={(value) => handleChange("consignee.name", value)}
-            editable={!loading}
-          />
+            <AppText weight="semiBold" style={styles.label}>Consignee Name *</AppText>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter consignee name"
+              placeholderTextColor="#999"
+              value={formData.consignee.name}
+              onChangeText={(value) => handleChange("consignee.name", value)}
+              editable={!loading}
+            />
 
-          <Text style={styles.label}>Consignee Phone *</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter consignee phone number"
-            placeholderTextColor="#999"
-            value={formData.consignee.phone}
-            onChangeText={(value) => handleChange("consignee.phone", value)}
-            keyboardType="phone-pad"
-            editable={!loading}
-          />
+            <AppText weight="semiBold" style={styles.label}>Consignee Phone *</AppText>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter consignee phone number"
+              placeholderTextColor="#999"
+              value={formData.consignee.phone}
+              onChangeText={(value) => handleChange("consignee.phone", value)}
+              keyboardType="phone-pad"
+              editable={!loading}
+            />
 
-          <Text style={styles.label}>Pickup Location *</Text>
-          <GooglePlacesAutocomplete
-            placeholder="Search pickup location"
-            fetchDetails
-            onPress={(data, details = null) => handlePlaceSelect("pickupLocation", data, details)}
-            query={{ key: GOOGLE_MAPS_API_KEY, language: "en" }}
-            enablePoweredByContainer={false}
-            styles={{
-              textInput: styles.input,
-              container: styles.autocompleteContainer,
-              listView: styles.autocompleteList
-            }}
-            debounce={200}
-          />
+            <AppText weight="semiBold" style={styles.label}>Pickup Location *</AppText>
+            <GooglePlacesAutocomplete
+              placeholder="Search pickup location"
+              fetchDetails
+              onPress={(data, details = null) => handlePlaceSelect("pickupLocation", data, details)}
+              query={{ key: GOOGLE_MAPS_API_KEY, language: "en" }}
+              enablePoweredByContainer={false}
+              styles={{
+                textInput: styles.input,
+                container: styles.autocompleteContainer,
+                listView: styles.autocompleteList
+              }}
+              debounce={200}
+            />
 
-          <Text style={styles.label}>Delivery Location *</Text>
-          <GooglePlacesAutocomplete
-            placeholder="Search delivery location"
-            fetchDetails
-            onPress={(data, details = null) => handlePlaceSelect("deliveryLocation", data, details)}
-            query={{ key: GOOGLE_MAPS_API_KEY, language: "en" }}
-            enablePoweredByContainer={false}
-            styles={{
-              textInput: styles.input,
-              container: styles.autocompleteContainer,
-              listView: styles.autocompleteList
-            }}
-            debounce={200}
-          />
+            <AppText weight="semiBold" style={styles.label}>Delivery Location *</AppText>
+            <GooglePlacesAutocomplete
+              placeholder="Search delivery location"
+              fetchDetails
+              onPress={(data, details = null) => handlePlaceSelect("deliveryLocation", data, details)}
+              query={{ key: GOOGLE_MAPS_API_KEY, language: "en" }}
+              enablePoweredByContainer={false}
+              styles={{
+                textInput: styles.input,
+                container: styles.autocompleteContainer,
+                listView: styles.autocompleteList
+              }}
+              debounce={200}
+            />
 
-          <Text style={styles.label}>Pickup Date *</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="YYYY-MM-DD"
-            placeholderTextColor="#999"
-            value={formData.pickupDate}
-            onChangeText={(value) => handleChange("pickupDate", value)}
-            editable={!loading}
-          />
+            <AppText weight="semiBold" style={styles.label}>Pickup Date *</AppText>
+            <TextInput
+              style={styles.input}
+              placeholder="YYYY-MM-DD"
+              placeholderTextColor="#999"
+              value={formData.pickupDate}
+              onChangeText={(value) => handleChange("pickupDate", value)}
+              editable={!loading}
+            />
 
-          <Text style={styles.label}>Delivery Date *</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="YYYY-MM-DD"
-            placeholderTextColor="#999"
-            value={formData.deliveryDate}
-            onChangeText={(value) => handleChange("deliveryDate", value)}
-            editable={!loading}
-          />
+            <AppText weight="semiBold" style={styles.label}>Delivery Date *</AppText>
+            <TextInput
+              style={styles.input}
+              placeholder="YYYY-MM-DD"
+              placeholderTextColor="#999"
+              value={formData.deliveryDate}
+              onChangeText={(value) => handleChange("deliveryDate", value)}
+              editable={!loading}
+            />
 
-          <Text style={styles.label}>Truck Type *</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="e.g., 10-wheeler, flatbed"
-            placeholderTextColor="#999"
-            value={formData.truckType}
-            onChangeText={(value) => handleChange("truckType", value)}
-            editable={!loading}
-          />
+            <AppText weight="semiBold" style={styles.label}>Truck Type *</AppText>
+            <TextInput
+              style={styles.input}
+              placeholder="e.g., 10-wheeler, flatbed"
+              placeholderTextColor="#999"
+              value={formData.truckType}
+              onChangeText={(value) => handleChange("truckType", value)}
+              editable={!loading}
+            />
 
-          <Text style={styles.label}>Cargo Type *</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="e.g., Electronics, Furniture, Food"
-            placeholderTextColor="#999"
-            value={formData.cargoType}
-            onChangeText={(value) => handleChange("cargoType", value)}
-            editable={!loading}
-          />
+            <AppText weight="semiBold" style={styles.label}>Cargo Type *</AppText>
+            <TextInput
+              style={styles.input}
+              placeholder="e.g., Electronics, Furniture, Food"
+              placeholderTextColor="#999"
+              value={formData.cargoType}
+              onChangeText={(value) => handleChange("cargoType", value)}
+              editable={!loading}
+            />
 
-          <Text style={styles.label}>Cargo Weight (kg) *</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter weight in kg"
-            placeholderTextColor="#999"
-            value={formData.cargoWeight}
-            onChangeText={(value) => handleChange("cargoWeight", value)}
-            keyboardType="numeric"
-            editable={!loading}
-          />
+            <AppText weight="semiBold" style={styles.label}>Cargo Weight (kg) *</AppText>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter weight in kg"
+              placeholderTextColor="#999"
+              value={formData.cargoWeight}
+              onChangeText={(value) => handleChange("cargoWeight", value)}
+              keyboardType="numeric"
+              editable={!loading}
+            />
 
-          <Text style={styles.label}>Special Instructions (Optional)</Text>
-          <TextInput
-            style={[styles.input, styles.textArea]}
-            placeholder="Any special handling requirements?"
-            placeholderTextColor="#999"
-            value={formData.specialInstructions}
-            onChangeText={(value) => handleChange("specialInstructions", value)}
-            multiline
-            numberOfLines={4}
-            editable={!loading}
-          />
+            <AppText weight="semiBold" style={styles.label}>Special Instructions (Optional)</AppText>
+            <TextInput
+              style={[styles.input, styles.textArea,]}
+              placeholder="Any special handling requirements?"
+              placeholderTextColor="#999"
+              value={formData.specialInstructions}
+              onChangeText={(value) => handleChange("specialInstructions", value)}
+              multiline
+              numberOfLines={4}
+              editable={!loading}
+            />
 
-          <TouchableOpacity
-            style={[styles.button, loading && styles.buttonDisabled]}
-            onPress={handleSubmit}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.buttonText}>Create Booking</Text>
-            )}
-          </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.button, loading && styles.buttonDisabled]}
+              onPress={handleSubmit}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.buttonText}>Create Booking</Text>
+              )}
+            </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.cancelButton}
-            onPress={() => navigation.goBack()}
-            disabled={loading}
-          >
-            <Text style={styles.cancelButtonText}>Cancel</Text>
-          </TouchableOpacity>
-        </View>
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={() => navigation.goBack()}
+              disabled={loading}
+            >
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
         )}
         nestedScrollEnabled
       />
@@ -347,23 +349,26 @@ export default function BookingScreen({ navigation }) {
   );
 }
 
+
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#f6f7fb",
   },
   scrollContainer: {
     flexGrow: 1,
+    paddingBottom: 160, // ✅ ADDED THIS ONLY
   },
   innerContainer: {
     padding: 20,
   },
   label: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: "600",
-    color: "#333",
-    marginBottom: 5,
-    marginTop: 10,
+    color: "#374151",
+    marginBottom: 6,
+    marginTop: 14,
   },
   helperText: {
     fontSize: 12,
@@ -372,44 +377,51 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   input: {
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    padding: 15,
-    fontSize: 16,
+    backgroundColor: "#f9fafb",
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    fontSize: 15,
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: "#e5e7eb",
   },
   textArea: {
     height: 100,
     textAlignVertical: "top",
   },
   button: {
-    backgroundColor: "#7b2ff2",
-    borderRadius: 8,
-    padding: 15,
+    backgroundColor: "#1E3A8A",
+    borderRadius: 14,
+    paddingVertical: 16,
     alignItems: "center",
-    marginTop: 20,
-  },
-  buttonDisabled: {
-    backgroundColor: "#ccc",
+    marginTop: 25,
+    shadowColor: "#7b2ff2",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
   },
   buttonText: {
     color: "#fff",
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: "600",
+  },
+  buttonDisabled: {
+    backgroundColor: "#ccc",
   },
   cancelButton: {
     backgroundColor: "#fff",
-    borderRadius: 8,
-    padding: 15,
+    borderRadius: 14,
+    paddingVertical: 16,
     alignItems: "center",
-    marginTop: 10,
+    marginTop: 12,
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: "#e5e7eb",
   },
   cancelButtonText: {
-    color: "#666",
-    fontSize: 16,
+    color: "#6b7280",
+    fontSize: 15,
+    fontWeight: "500",
   },
   autocompleteContainer: {
     flex: 0,
@@ -417,5 +429,22 @@ const styles = StyleSheet.create({
   },
   autocompleteList: {
     backgroundColor: "#fff",
+  },
+  sectionCard: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 18,
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    marginBottom: 10,
+    color: "#111827",
   },
 });

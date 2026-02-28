@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useCallback } from "react";
 import {
   View,
   Text,
@@ -9,10 +9,17 @@ import {
   ActivityIndicator,
   RefreshControl,
   Linking,
+  Dimensions
 } from "react-native";
 import bookingService from "../services/booking.service";
+import AppText from "../components/AppText";
+import { useFocusEffect } from "@react-navigation/native";
+import { Feather } from "@expo/vector-icons";
 
-const API_BASE_URL = "http://172.20.10.6:5000";
+
+
+
+const API_BASE_URL = "http://54.174.219.57:5000";
 
 export default function BookingQuotesScreen({ route, navigation }) {
   const { bookingId } = route.params || {};
@@ -23,24 +30,19 @@ export default function BookingQuotesScreen({ route, navigation }) {
 
   console.log('[BookingQuotesScreen] Screen loaded with bookingId:', bookingId);
 
-  useEffect(() => {
-    if (!bookingId) {
-      console.error('[BookingQuotesScreen] No bookingId provided!');
-      Alert.alert("Error", "No booking ID provided");
-      return;
+useFocusEffect(
+  useCallback(() => {
+    if (bookingId) {
+      fetchBooking();
     }
-    console.log('[BookingQuotesScreen] Mounted with bookingId:', bookingId);
-    fetchBooking();
-    // Auto-refresh every 5 seconds to see new quotes
-    const interval = setInterval(fetchBooking, 5000);
-    return () => clearInterval(interval);
-  }, [bookingId]);
+  }, [bookingId])
+);
 
   const fetchBooking = async () => {
     try {
       if (!loading) setRefreshing(true);
       const data = await bookingService.getBookingById(bookingId);
-      console.log('[BookingQuotes] Raw API response:', JSON.stringify(data, null, 2));
+      // console.log('[BookingQuotes] Raw API response:', JSON.stringify(data, null, 2));
       console.log('[BookingQuotes] Quotations array:', data?.quotations);
       console.log('[BookingQuotes] Number of quotes:', data?.quotations?.length || 0);
       setBooking(data);
@@ -55,6 +57,15 @@ export default function BookingQuotesScreen({ route, navigation }) {
     }
   };
 
+  const selectedQuotation = booking?.quotations?.find(q => q.selected);
+
+  const selectedPrice = selectedQuotation?.price ?? 0;
+
+const selectedDriverName =
+  selectedQuotation?.driverId?.userId
+    ? `${selectedQuotation.driverId.userId.firstName} ${selectedQuotation.driverId.userId.lastName}`
+    : "Driver";
+
   const onRefresh = async () => {
     await fetchBooking();
   };
@@ -62,7 +73,9 @@ export default function BookingQuotesScreen({ route, navigation }) {
   const handleSelectQuote = async (quoteIndex) => {
     try {
       setSelecting(true);
-      await bookingService.selectQuote(bookingId, quoteIndex);
+      const updatedBooking = await bookingService.selectQuote(bookingId, quoteIndex);
+      console.log('[handleSelectQuote] Updated booking after selection:', JSON.stringify(updatedBooking, null, 2));
+      setBooking(updatedBooking); // Immediate update
       Alert.alert("Success", "Quote selected! PDF has been generated.", [
         { text: "OK", onPress: () => fetchBooking() },
       ]);
@@ -80,24 +93,28 @@ export default function BookingQuotesScreen({ route, navigation }) {
   const renderQuoteItem = ({ item, index }) => (
     <View style={styles.quoteCard}>
       <View style={styles.quoteHeader}>
-        <Text style={styles.quoteTitle}>Quote #{index + 1}</Text>
-        <Text style={styles.quotedBy}>
-          By: {item.quotedBy === "driver" ? "Driver" : "Admin"}
-        </Text>
+        <AppText weight="semiBold" style={styles.quoteTitle}>Quote #{index + 1}</AppText>
+        <AppText weight="semiBold" style={styles.quotedBy}>
+          By: {
+            item.driverId?.userId?.firstName
+              ? `${item.driverId.userId.firstName} ${item.driverId.userId.lastName}`
+              : "Driver"
+          }
+        </AppText>
       </View>
       <View style={styles.quoteDetails}>
-        <Text style={styles.amount}>₹ {item.amount || 0}</Text>
-        {item.notes && <Text style={styles.notes}>{item.notes}</Text>}
-        <Text style={styles.createdAt}>
+        <AppText weight="semiBold" style={styles.amount}>$ {item.price != null ? item.price : 0}</AppText>
+        {item.notes && <AppText style={styles.notes}>{item.notes}</AppText>}
+        <AppText style={styles.createdAt}>
           {item.createdAt ? new Date(item.createdAt).toLocaleDateString() : 'N/A'}
-        </Text>
+        </AppText>
       </View>
       <TouchableOpacity
         style={[styles.selectButton, (selecting || booking?.rateConfirmation?.status !== "not_generated") && styles.selectButtonDisabled]}
         onPress={() => handleSelectQuote(index)}
         disabled={selecting || booking?.rateConfirmation?.status !== "not_generated"}
       >
-        <Text style={styles.selectButtonText}>Select Quote</Text>
+        <AppText weight="semiBold" style={styles.selectButtonText}>Select Quote</AppText>
       </TouchableOpacity>
     </View>
   );
@@ -106,7 +123,7 @@ export default function BookingQuotesScreen({ route, navigation }) {
     return (
       <View style={styles.centerContainer}>
         <ActivityIndicator size="large" color="#7b2ff2" />
-        <Text style={styles.loadingText}>Loading booking...</Text>
+        <AppText weight="semiBold" style={styles.loadingText}>Loading booking...</AppText>
       </View>
     );
   }
@@ -114,13 +131,17 @@ export default function BookingQuotesScreen({ route, navigation }) {
   if (!booking) {
     return (
       <View style={styles.centerContainer}>
-        <Text style={styles.errorText}>Booking not found</Text>
+        <AppText weight="semiBold" style={styles.errorText}>Booking not found</AppText>
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <Text style={styles.backButtonText}>Go Back</Text>
+          <AppText weight="semiBold" style={styles.backButtonText}>Go Back</AppText>
         </TouchableOpacity>
       </View>
     );
   }
+
+  // Debug: Log rateConfirmation and selectedQuote object
+  // console.log('rateConfirmation:', booking.rateConfirmation);
+  console.log('selectedQuote:', booking.quotations[0]?.selected);
 
   const quotes = booking.quotations || [];
   const rateConfirmationStatus = booking.rateConfirmation?.status || "not_generated";
@@ -129,34 +150,47 @@ export default function BookingQuotesScreen({ route, navigation }) {
     <View style={styles.container}>
       {/* Booking Header */}
       <View style={styles.bookingHeader}>
-        <Text style={styles.bookingTitle}>Booking Quotes</Text>
-        <Text style={styles.bookingId}>ID: {bookingId?.slice(-8) || 'N/A'}</Text>
-        {booking && (
-          <>
-            <Text style={styles.bookingRoute}>
-              {booking.pickupLocation?.address?.slice(0, 30)}...{'\n'}→ {booking.deliveryLocation?.address?.slice(0, 30)}...
-            </Text>
-            <View style={styles.statusBadge}>
-              <Text style={styles.statusText}>
-                {rateConfirmationStatus.toUpperCase().replace(/_/g, " ")}
-              </Text>
-            </View>
-          </>
-        )}
+
+       
+     <View style={styles.headerRow}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerBack}>
+            <Feather name="arrow-left" size={22} color="#fff" />
+          </TouchableOpacity>
+          <View style={{ flex: 1 }} />
+        </View>
+
+        <AppText weight="bold" style={styles.bookingTitle}>Booking Quotes</AppText>
+        <AppText weight="semiBold" style={styles.bookingId}>ID: {bookingId?.slice(-8) || 'N/A'}</AppText>
+
+        <>
+          <AppText weight="semiBold" style={styles.bookingRoute}>
+            {booking.pickupLocation?.address?.slice(0, 30)}...{'\n'}→ {booking.deliveryLocation?.address?.slice(0, 30)}...
+          </AppText>
+          <View style={styles.statusBadge}>
+            <AppText weight="semiBold" style={styles.statusText}>
+              {rateConfirmationStatus.toUpperCase().replace(/_/g, " ")}
+            </AppText>
+          </View>
+        </>
       </View>
 
       {/* Selected Quote Info */}
-      {booking.selectedQuote && (
+      {(booking.selectedQuote || (booking.rateConfirmation && booking.rateConfirmation.pdfUrl)) && (
         <View style={styles.selectedQuoteContainer}>
-          <Text style={styles.selectedQuoteTitle}>Selected Quote</Text>
-          <Text style={styles.selectedAmount}>₹ {booking.selectedQuote.amount}</Text>
-          <Text style={styles.statusInfo}>
+          <AppText weight="semiBold" style={styles.selectedQuoteTitle}>Selected Quote</AppText>
+          <AppText weight="bold" style={styles.selectedAmount}>
+            ${selectedPrice}
+          </AppText>
+          <AppText weight="semiBold" style={styles.statusInfo}>
             Status: {rateConfirmationStatus.toUpperCase().replace(/_/g, " ")}
-          </Text>
-          
+          </AppText>
+          {/* Show driver name if available */}
+          <AppText weight="semiBold" style={styles.quotedBy}>
+            Quoted By: {selectedDriverName}
+          </AppText>
           {/* Action Buttons */}
           <View style={styles.pdfButtonsRow}>
-            {booking.rateConfirmation?.pdfUrl && (
+            {booking.rateConfirmation?.pdfUrl  && rateConfirmationStatus !== "awaiting_user_signature" && (
               <TouchableOpacity
                 style={styles.viewPdfButton}
                 onPress={() => {
@@ -166,34 +200,30 @@ export default function BookingQuotesScreen({ route, navigation }) {
                   });
                 }}
               >
-                <Text style={styles.viewPdfButtonText}>📄 View PDF</Text>
+                <AppText weight="semiBold" style={styles.viewPdfButtonText}>📄 View PDF</AppText>
               </TouchableOpacity>
             )}
-            
-            {rateConfirmationStatus === "generated" && (
+            {rateConfirmationStatus === "awaiting_user_signature" && (
               <TouchableOpacity
                 style={styles.signButton}
                 onPress={() => navigation.navigate("Signature", { bookingId })}
               >
-                <Text style={styles.signButtonText}>✍️ Sign Now</Text>
+                <AppText weight="semiBold" style={styles.signButtonText}>✍️ Sign Now</AppText>
               </TouchableOpacity>
             )}
-            
             {rateConfirmationStatus === "not_generated" && (
               <View style={styles.waitingBox}>
-                <Text style={styles.waitingText}>⏳ PDF will be generated after selection</Text>
+                <AppText weight="semiBold" style={styles.waitingText}>⏳ PDF will be generated after selection</AppText>
               </View>
             )}
-            
             {rateConfirmationStatus === "user_signed" && (
               <View style={styles.waitingBox}>
-                <Text style={styles.waitingText}>✓ Signed - Waiting for driver acceptance</Text>
+                <AppText weight="semiBold" style={styles.waitingText}>✓ Signed - Waiting for driver acceptance</AppText>
               </View>
             )}
-            
             {rateConfirmationStatus === "driver_accepted" && (
               <View style={styles.completedBox}>
-                <Text style={styles.completedText}>✓ Completed - Ready for pickup</Text>
+                <AppText weight="semiBold" style={styles.completedText}>✓ Completed - Ready for pickup</AppText>
               </View>
             )}
           </View>
@@ -211,24 +241,37 @@ export default function BookingQuotesScreen({ route, navigation }) {
         />
       ) : (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>No quotes yet</Text>
-          <Text style={styles.emptySubText}>
+          <AppText weight="semiBold" style={styles.emptyText}>No quotes yet</AppText>
+          <AppText weight="normal" style={styles.emptySubText}>
             Waiting for drivers to submit quotes...
-          </Text>
+          </AppText>
         </View>
       )}
 
-      <TouchableOpacity style={styles.closeButton} onPress={() => navigation.goBack()}>
-        <Text style={styles.closeButtonText}>Close</Text>
-      </TouchableOpacity>
+     
     </View>
   );
 }
 
+const {height}=Dimensions.get("window")
 const styles = StyleSheet.create({
+  headerRow: {
+  flexDirection: "row",
+  alignItems: "center",
+  marginBottom: 10,
+},
+
+headerBack: {
+  width: 36,
+  height: 36,
+  borderRadius: 10,
+  backgroundColor: "rgba(255,255,255,0.2)",
+  justifyContent: "center",
+  alignItems: "center",
+},
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#F6F7FB",
   },
   centerContainer: {
     flex: 1,
@@ -247,51 +290,61 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   bookingHeader: {
-    backgroundColor: "#fff",
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
+    backgroundColor: "#1E3A8A",
+    paddingTop: 55,
+    paddingBottom: 25,
+    paddingHorizontal: 20,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
   },
   bookingTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#333",
-    marginBottom: 5,
+    fontSize: 20,
+    fontWeight: "600",
+    color: "#fff",
+    marginBottom: 6,
   },
+
   bookingId: {
     fontSize: 12,
-    color: "#999",
-    marginBottom: 5,
+    color: "rgba(255,255,255,0.8)",
+    marginBottom: 8,
   },
+
   bookingRoute: {
     fontSize: 13,
-    color: "#666",
-    marginBottom: 10,
+    color: "rgba(255,255,255,0.85)",
+    marginBottom: 12,
   },
   statusBadge: {
-    backgroundColor: "#e3f2fd",
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    backgroundColor: "rgba(255,255,255,0.15)",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     borderRadius: 20,
     alignSelf: "flex-start",
   },
+
   statusText: {
     fontSize: 12,
     fontWeight: "600",
-    color: "#1976d2",
+    color: "#fff",
   },
   selectedQuoteContainer: {
-    backgroundColor: "#fff3e0",
-    margin: 15,
-    padding: 15,
-    borderRadius: 8,
-    borderLeftWidth: 4,
-    borderLeftColor: "#ff9800",
+    backgroundColor: "#fff",
+    marginHorizontal: 16,
+    marginTop: 20,
+    padding: 20,
+    borderRadius: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
   },
   selectedQuoteTitle: {
     fontSize: 13,
     fontWeight: "600",
     color: "#e65100",
+  },
   statusInfo: {
     fontSize: 13,
     color: "#666",
@@ -302,18 +355,13 @@ const styles = StyleSheet.create({
     marginTop: 15,
     gap: 10,
   },
+
   viewPdfButton: {
-    backgroundColor: "#ff9800",
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 15,
+    backgroundColor: "#1E3A8A",
+    borderRadius: 14,
+    paddingVertical: 14,
     alignItems: "center",
-    marginBottom: 10,
-  },
-  viewPdfButtonText: {
     color: "#fff",
-    fontSize: 15,
-    fontWeight: "600",
   },
   signButton: {
     backgroundColor: "#4caf50",
@@ -360,13 +408,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
   },
-    marginBottom: 5,
-  },
   selectedAmount: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#ff9800",
-    marginBottom: 5,
+    fontSize: 28,
+    fontWeight: "700",
+    color: "#1E3A8A",
+    marginVertical: 6,
   },
   pdfUrl: {
     fontSize: 11,
@@ -375,15 +421,19 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     padding: 15,
-    paddingBottom: 80,
+    paddingBottom: 120,
   },
+  
   quoteCard: {
     backgroundColor: "#fff",
-    borderRadius: 8,
-    padding: 15,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: "#e0e0e0",
+    borderRadius: 16,
+    padding: 18,
+    marginBottom: 14,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
   },
   quoteHeader: {
     flexDirection: "row",
@@ -404,10 +454,10 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   amount: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#7b2ff2",
-    marginBottom: 5,
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#1E3A8A",
+    marginBottom: 6,
   },
   notes: {
     fontSize: 13,
@@ -419,15 +469,20 @@ const styles = StyleSheet.create({
     color: "#999",
   },
   selectButton: {
-    backgroundColor: "#7b2ff2",
-    borderRadius: 8,
-    paddingVertical: 10,
+    backgroundColor: "#1E3A8A",
+    borderRadius: 12,
+    paddingVertical: 12,
     alignItems: "center",
   },
   selectButtonDisabled: {
     backgroundColor: "#ccc",
   },
   selectButtonText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  viewPdfButtonText: {
     color: "#fff",
     fontSize: 14,
     fontWeight: "600",
@@ -451,7 +506,7 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     position: "absolute",
-    bottom: 20,
+    bottom: height*0.03,
     left: 20,
     right: 20,
     backgroundColor: "#fff",
@@ -460,6 +515,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderWidth: 1,
     borderColor: "#ddd",
+    
   },
   closeButtonText: {
     fontSize: 14,
@@ -476,5 +532,10 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 14,
     fontWeight: "600",
+  },
+  selectedQuoteTitle: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#6B7280",
   },
 });

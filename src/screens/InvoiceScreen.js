@@ -1,23 +1,76 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef,useCallback } from "react";
+import io from "socket.io-client";
+
+import * as WebBrowser from "expo-web-browser";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 import {
   View,
-  Text,
   StyleSheet,
   FlatList,
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
   Alert,
+  AppState,
+  StatusBar,
 } from "react-native";
 import invoiceService from "../services/invoice.service";
+import Icon from "react-native-vector-icons/MaterialIcons";
+import AppText from "../components/AppText";
+import { fonts } from "../themes/typography";
+import { useFocusEffect } from "@react-navigation/native";
+
 
 export default function InvoiceScreen({ navigation }) {
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const socketRef = useRef(null);
+
+  useFocusEffect(
+    useCallback(()=>{
+      loadInvoices()
+    },[])
+  )
 
   useEffect(() => {
-    loadInvoices();
+    socketRef.current = io("http://54.174.219.57:5000");
+
+    const initialize = async () => {
+      loadInvoices();
+
+      const userData = await AsyncStorage.getItem("user");
+      const parsedUser = JSON.parse(userData);
+
+      if (parsedUser?._id) {
+        socketRef.current.emit("join-user", parsedUser._id);
+      }
+    };
+
+    initialize();
+
+    socketRef.current.on("paymentUpdate", (data) => {
+      Alert.alert(data.message);
+      loadInvoices();
+    });
+
+    return () => {
+      socketRef.current.off("paymentUpdate");
+      socketRef.current.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", (state) => {
+      if (state === "active") {
+        loadInvoices();
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
   }, []);
 
   const loadInvoices = async () => {
@@ -32,66 +85,138 @@ export default function InvoiceScreen({ navigation }) {
     }
   };
 
+const handlePayment = async (invoiceId, method = "online") => {
+  try {
+    if (method === "online") {
+      // Online payment
+      const response = await invoiceService.payInvoice(invoiceId, {
+        paymentMethod: "online",
+      });
+
+      if (response?.checkoutUrl) {
+        await WebBrowser.openBrowserAsync(response.checkoutUrl);
+      } else {
+        Alert.alert("Error", "Unable to initiate payment");
+      }
+
+    } else {
+      // 🔥 OFFLINE → Only fetch bank details (NO status change)
+      const response = await invoiceService.payInvoice(invoiceId, {
+        paymentMethod: "offline",
+      });
+
+      navigation.navigate("BankTransfer", {
+        invoiceId,
+        bankDetails: response.bankDetails,
+      });
+    }
+
+  } catch (error) {
+    console.log("Payment error:", error);
+    Alert.alert("Payment failed", "Please try again.");
+  }
+};
+
   const onRefresh = () => {
     setRefreshing(true);
     loadInvoices();
   };
 
-  const renderInvoiceItem = ({ item }) => (
-    <TouchableOpacity style={styles.invoiceCard}>
-      <View style={styles.invoiceHeader}>
-        <Text style={styles.invoiceId}>Invoice #{item._id?.slice(-6)}</Text>
-        <Text
-          style={[
-            styles.status,
-            item.status === "paid" ? styles.statusPaid : styles.statusPending,
-          ]}
-        >
-          {item.status?.toUpperCase()}
-        </Text>
-      </View>
+  const renderInvoiceItem = ({ item }) => {
+    const isPending = item.status === "pending_payment";
+    const isPaid = item.status === "paid";
 
-      <View style={styles.invoiceDetails}>
-        <View style={styles.detailRow}>
-          <Text style={styles.detailLabel}>Amount:</Text>
-          <Text style={styles.detailValue}>${item.amount}</Text>
+    return (
+      <View style={styles.invoiceCard}>
+        <View style={styles.invoiceTop}>
+          <AppText style={styles.invoiceId}>
+            INV #{item._id.slice(0, 8)}
+          </AppText>
+
+          <View
+            style={[
+              styles.statusBadge,
+              isPending && styles.pendingBadge,
+              isPaid && styles.paidBadge,
+            ]}
+          >
+            <AppText weight="semiBold" style={styles.statusText}>
+              {item.status.replace(/_/g, " ").toUpperCase()}
+            </AppText>
+          </View>
         </View>
-        <View style={styles.detailRow}>
-          <Text style={styles.detailLabel}>Date:</Text>
-          <Text style={styles.detailValue}>
-            {new Date(item.createdAt).toLocaleDateString()}
-          </Text>
+
+        <AppText style={styles.amount}>
+          ${item.totalAmount}
+        </AppText>
+
+        <View style={styles.routeBox}>
+          <AppText style={styles.routeLabel}>Pickup</AppText>
+          <AppText style={styles.routeText}>
+            {item.trip?.bookingId?.pickupLocation?.address || "N/A"}
+          </AppText>
+
+          <AppText style={[styles.routeLabel, { marginTop: 10 }]}>Drop</AppText>
+          <AppText style={styles.routeText}>
+            {item.trip?.bookingId?.deliveryLocation?.address || "N/A"}
+          </AppText>
         </View>
-        {item.dueDate && (
-          <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Due Date:</Text>
-            <Text style={styles.detailValue}>
-              {new Date(item.dueDate).toLocaleDateString()}
-            </Text>
+
+        {isPending && (
+          <View style={{ marginTop: 15 }}>
+            <TouchableOpacity
+              style={styles.primaryButton}
+              onPress={() => handlePayment(item._id)}
+            >
+              <AppText style={styles.primaryButtonText}>
+                Pay Online
+              </AppText>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.secondaryButton}
+              onPress={() => handlePayment(item._id, "offline")}
+            >
+              <AppText style={styles.secondaryButtonText}>
+                Bank Transfer
+              </AppText>
+            </TouchableOpacity>
           </View>
         )}
       </View>
-
-      {item.status === "pending" && (
-        <TouchableOpacity style={styles.payButton}>
-          <Text style={styles.payButtonText}>Pay Now</Text>
-        </TouchableOpacity>
-      )}
-    </TouchableOpacity>
-  );
+    );
+  };
 
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#2196F3" />
+        <ActivityIndicator size="large" color="#1E3A8A" />
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
+      {/* STATUS BAR */}
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor="#1E3A8A"
+      />
+
+      {/* HEADER */}
       <View style={styles.header}>
-        <Text style={styles.title}>My Invoices</Text>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        >
+          <Icon name="arrow-back" size={22} color="#fff" />
+        </TouchableOpacity>
+
+        <AppText weight="bold" style={styles.title}>
+          My Invoices
+        </AppText>
+
+        <View style={{ width: 40 }} />
       </View>
 
       <FlatList
@@ -104,7 +229,9 @@ export default function InvoiceScreen({ navigation }) {
         }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No invoices found</Text>
+            <AppText weight="semiBold" style={styles.emptyText}>
+              No invoices found
+            </AppText>
           </View>
         }
       />
@@ -115,98 +242,140 @@ export default function InvoiceScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#F1F5F9",
   },
+
+  header: {
+    backgroundColor: "#1E3A8A",
+    paddingTop: 43,
+    paddingBottom: 20,
+    paddingHorizontal: 20,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  title: {
+    fontSize: 20,
+    color: "#fff",
+    fontFamily: fonts.semiBold,
+  },
+
+  listContainer: {
+    padding: 16,
+  },
+
   centerContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
-  header: {
-    backgroundColor: "#7b2ff2",
-    padding: 20,
-    paddingTop: 50,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#fff",
-  },
-  listContainer: {
-    padding: 15,
-  },
+
   invoiceCard: {
     backgroundColor: "#fff",
-    padding: 15,
-    borderRadius: 8,
-    marginBottom: 10,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    borderRadius: 18,
+    padding: 18,
+    marginBottom: 16,
+    elevation: 4,
   },
-  invoiceHeader: {
+
+  invoiceTop: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 15,
   },
+
   invoiceId: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#333",
+    fontWeight: "600",
+    color: "#1E293B",
   },
-  status: {
+
+  amount: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#1E3A8A",
+    marginTop: 8,
+  },
+
+  routeBox: {
+    marginTop: 14,
+    backgroundColor: "#F8FAFC",
+    borderRadius: 12,
+    padding: 12,
+  },
+
+  routeLabel: {
     fontSize: 12,
-    fontWeight: "bold",
+    color: "#64748B",
+  },
+
+  routeText: {
+    fontSize: 14,
+    color: "#1E293B",
+    fontWeight: "500",
+  },
+
+  statusBadge: {
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 12,
+    borderRadius: 20,
   },
-  statusPaid: {
-    backgroundColor: "#D4EDDA",
-    color: "#155724",
+
+  pendingBadge: {
+    backgroundColor: "#FEF3C7",
   },
-  statusPending: {
-    backgroundColor: "#FFF3CD",
-    color: "#856404",
+
+  paidBadge: {
+    backgroundColor: "#DCFCE7",
   },
-  invoiceDetails: {
-    marginBottom: 10,
-  },
-  detailRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 8,
-  },
-  detailLabel: {
-    fontSize: 14,
-    color: "#666",
-  },
-  detailValue: {
-    fontSize: 14,
+
+  statusText: {
+    fontSize: 11,
     fontWeight: "600",
-    color: "#333",
+    color: "#1E293B",
   },
-  payButton: {
-    backgroundColor: "#7b2ff2",
-    padding: 12,
-    borderRadius: 6,
+
+  primaryButton: {
+    backgroundColor: "#1E3A8A",
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: "center",
+  },
+
+  primaryButtonText: {
+    color: "#fff",
+    fontWeight: "600",
+  },
+
+  secondaryButton: {
+    borderWidth: 1,
+    borderColor: "#1E3A8A",
+    paddingVertical: 14,
+    borderRadius: 14,
     alignItems: "center",
     marginTop: 10,
   },
-  payButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 14,
+
+  secondaryButtonText: {
+    color: "#1E3A8A",
+    fontWeight: "600",
   },
+
   emptyContainer: {
+    marginTop: 60,
     alignItems: "center",
-    paddingTop: 50,
   },
+
   emptyText: {
-    fontSize: 16,
-    color: "#666",
+    color: "#64748B",
   },
 });

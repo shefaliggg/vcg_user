@@ -1,7 +1,7 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const API_BASE_URL = "http://172.20.10.6:5000/api";
+const API_BASE_URL = "http://54.174.219.57:5000/api";
 
 const uploadSignature = async (blob) => {
   const token = await AsyncStorage.getItem("authToken");
@@ -13,7 +13,7 @@ const uploadSignature = async (blob) => {
     name: `signature-${Date.now()}.png`,
   });
 
-  const response = await axios.post(`${API_BASE_URL}/upload/signature`, formData, {
+  const response = await axios.post(`${API_BASE_URL}/upload/signature-base64`, formData, {
     headers: {
       "Content-Type": "multipart/form-data",
       Authorization: `Bearer ${token}`,

@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useCallback, useEffect } from "react";
+import { useFocusEffect } from "@react-navigation/native";
+import { Feather, MaterialIcons } from "@expo/vector-icons";
 import {
   View,
   Text,
@@ -8,20 +10,70 @@ import {
   ActivityIndicator,
   RefreshControl,
   Alert,
+  StatusBar,
 } from "react-native";
 import bookingService from "../services/booking.service";
 import authService from "../services/auth.service";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import api from "../services/api.service";
+import { DeviceEventEmitter } from "react-native";
+import AppText from "../components/AppText";
 
 export default function HomeScreen({ navigation }) {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [user, setUser] = useState(null);
+  const [unread, setUnread] = useState(0);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadData();
+    }, [])
+  );
 
   useEffect(() => {
-    loadData();
+    fetchCount();
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchCount();
+    }, [])
+  );
+
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(
+      "refreshNotifications",
+      () => {
+        fetchCount();
+      }
+    );
+    return () => listener.remove();
+  }, []);
+
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener(
+      "openNotification",
+      (data) => {
+        if (data?.type === "trip_status") {
+          navigation.navigate("TrackingScreen", {
+            tripId: data.tripId,
+          });
+        }
+      }
+    );
+    return () => listener.remove();
+  }, []);
+
+  const fetchCount = async () => {
+    try {
+      const res = await api.get("/notifications/unread-count");
+      setUnread(res.data.count);
+    } catch (err) {
+      console.log("Unread count error:", err);
+    }
+  };
 
   const loadData = async () => {
     try {
@@ -31,7 +83,6 @@ export default function HomeScreen({ navigation }) {
         setBookings([]);
         setLoading(false);
         setRefreshing(false);
-        // If unauthenticated, go to Login
         navigation.replace("Login");
         return;
       }
@@ -42,7 +93,6 @@ export default function HomeScreen({ navigation }) {
       const bookingsData = await bookingService.getMyBookings();
       setBookings(bookingsData);
     } catch (error) {
-      // On 401, clear auth and navigate to Login
       if (error?.response?.status === 401) {
         await authService.logout();
         navigation.replace("Login");
@@ -60,92 +110,134 @@ export default function HomeScreen({ navigation }) {
     loadData();
   };
 
-  const handleLogout = async () => {
-    Alert.alert("Logout", "Are you sure you want to logout?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Logout",
-        style: "destructive",
-        onPress: async () => {
-          await authService.logout();
-          navigation.replace("Login");
-        },
-      },
-    ]);
-  };
-
   const renderBookingItem = ({ item }) => (
     <TouchableOpacity
       style={styles.bookingCard}
-      onPress={() => navigation.navigate("Tracking", { bookingId: item._id })}
+      activeOpacity={0.85}
+      onPress={() =>
+        navigation.navigate("Tracking", { bookingId: item._id })
+      }
     >
       <View style={styles.bookingHeader}>
-        <Text style={styles.bookingId}>#{item._id?.slice(-6)}</Text>
-        <Text style={[styles.status, styles[`status${item.status}`]]}>
-          {item.status}
-        </Text>
+        <AppText weight="semiBold" style={styles.bookingId}>
+          #{item._id?.slice(-6).toUpperCase()}
+        </AppText>
+
+        <AppText
+          style={[
+            styles.statusBadge,
+            item.status === "ACCEPTED" && styles.statusAccepted,
+            item.status === "PENDING" && styles.statusPending,
+            item.status === "CONFIRMED" && styles.statusConfirmed,
+            item.status === "completed" && styles.statusCompleted,
+            item.status === "CANCELLED" && styles.statusCancelled,
+            item.status === "REJECTED" && styles.statusCancelled,
+            item.status === "POD_APPROVED" && styles.statusApproved,
+          ]}
+        >
+          {item.status.replace(/_/g, " ")}
+        </AppText>
       </View>
-      <Text style={styles.bookingRoute}>
-        {item.pickupLocation?.address || "N/A"} → {item.deliveryLocation?.address || "N/A"}
-      </Text>
-      <Text style={styles.bookingDate}>
-        {new Date(item.createdAt).toLocaleDateString()}
-      </Text>
+
+      <AppText weight="semiBold" style={styles.routeText}>
+        {item.pickupLocation?.address || "N/A"} →{" "}
+        {item.deliveryLocation?.address || "N/A"}
+      </AppText>
+
+      <AppText weight="semiBold" style={styles.metaText}>
+        📅 {new Date(item.createdAt).toLocaleDateString()}
+      </AppText>
     </TouchableOpacity>
   );
 
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#2196F3" />
+        <ActivityIndicator size="large" color="#1E3A8A" />
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
+      {/* STATUS BAR */}
+      <StatusBar
+        barStyle="dark-content"
+        backgroundColor="#FFFFFF"
+      />
+
+      {/* HEADER */}
       <View style={styles.header}>
         <View>
-          <Text style={styles.welcomeText}>Welcome,</Text>
-          <Text style={styles.userName}>{user?.firstName || "User"}</Text>
+          <AppText weight="bold" style={styles.greeting}>
+            Welcome back
+          </AppText>
+          <AppText weight="semiBold" style={styles.userName}>
+            {user?.firstName || "User"}
+          </AppText>
         </View>
-        <View style={styles.headerButtons}>
-          <TouchableOpacity 
-            onPress={() => navigation.navigate('Profile')} 
-            style={styles.profileButton}
+
+        <View style={styles.headerRight}>
+          <TouchableOpacity
+            style={styles.iconButton}
+            onPress={() => navigation.navigate("Notifications")}
           >
-            <Text style={styles.profileText}>Profile</Text>
+            <Feather name="bell" size={22} color="#111827" />
+            {unread > 0 && (
+              <View style={styles.badge}>
+                <AppText weight="semiBold" style={styles.badgeText}>
+                  {unread}
+                </AppText>
+              </View>
+            )}
           </TouchableOpacity>
-          <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-            <Text style={styles.logoutText}>Logout</Text>
+
+          <TouchableOpacity
+            style={styles.iconButton}
+            onPress={() => navigation.navigate("Profile")}
+          >
+            <Feather name="user" size={22} color="#111827" />
           </TouchableOpacity>
         </View>
       </View>
 
       <View style={styles.actionsContainer}>
         <TouchableOpacity
-          style={styles.actionButton}
+          style={styles.primaryAction}
           onPress={() => navigation.navigate("Booking")}
         >
-          <Text style={styles.actionButtonText}>+ New Booking</Text>
+          <Feather name="plus" size={18} color="#fff" />
+          <AppText weight="semiBold" style={styles.primaryActionText}>
+            New Booking
+          </AppText>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[styles.actionButton, styles.actionButtonSecondary]}
-          onPress={() => navigation.navigate("MyBookings")}
-        >
-          <Text style={styles.actionButtonTextSecondary}>View All Bookings</Text>
-        </TouchableOpacity>
+        <View style={styles.secondaryRow}>
+          <TouchableOpacity
+            style={styles.secondaryAction}
+            onPress={() => navigation.navigate("MyBookings")}
+          >
+            <MaterialIcons name="list-alt" size={18} color="#1E3A8A" />
+            <AppText weight="semiBold" style={styles.secondaryText}>
+              All Bookings
+            </AppText>
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[styles.actionButton, styles.actionButtonSecondary]}
-          onPress={() => navigation.navigate("Invoices")}
-        >
-          <Text style={styles.actionButtonTextSecondary}>View Invoices</Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.secondaryAction}
+            onPress={() => navigation.navigate("Invoices")}
+          >
+            <MaterialIcons name="receipt" size={18} color="#1E3A8A" />
+            <AppText weight="semiBold" style={styles.secondaryText}>
+              Invoices
+            </AppText>
+          </TouchableOpacity>
+        </View>
       </View>
 
-      <Text style={styles.sectionTitle}>My Bookings</Text>
+      <AppText weight="bold" style={styles.sectionTitle}>
+        My Bookings
+      </AppText>
 
       <FlatList
         data={bookings}
@@ -153,15 +245,10 @@ export default function HomeScreen({ navigation }) {
         keyExtractor={(item) => item._id}
         contentContainerStyle={styles.listContainer}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No bookings yet</Text>
-            <Text style={styles.emptySubtext}>
-              Create your first booking to get started
-            </Text>
-          </View>
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+          />
         }
       />
     </View>
@@ -171,156 +258,159 @@ export default function HomeScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f3e6ff",
+    backgroundColor: "#F8FAFC",
   },
+
   centerContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
+
   header: {
-    backgroundColor: "#7b2ff2",
-    padding: 20,
-    paddingTop: 50,
+    paddingHorizontal: 20,
+    paddingTop: 43,
+    paddingBottom: 20,
+    backgroundColor: "#FFFFFF",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E7EB",
   },
-  welcomeText: {
-    color: "#fff",
-    fontSize: 16,
+
+  greeting: {
+    fontSize: 14,
+    color: "#6B7280",
   },
+
   userName: {
-    color: "#fff",
-    fontSize: 24,
-    fontWeight: "bold",
+    fontSize: 22,
+    color: "#111827",
   },
-  headerButtons: {
+
+  headerRight: {
     flexDirection: "row",
+    gap: 15,
+  },
+
+  iconButton: {
+    position: "relative",
+  },
+
+  badge: {
+    position: "absolute",
+    top: -6,
+    right: -6,
+    backgroundColor: "#EF4444",
+    borderRadius: 10,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+
+  badgeText: {
+    color: "#fff",
+    fontSize: 10,
+  },
+
+  actionsContainer: {
+    paddingHorizontal: 20,
+    paddingTop: 10,
+  },
+
+  primaryAction: {
+    backgroundColor: "#1E3A8A",
+    padding: 16,
+    borderRadius: 14,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
     gap: 8,
   },
-  profileButton: {
-    backgroundColor: "rgba(255,255,255,0.2)",
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    borderRadius: 5,
-  },
-  profileText: {
+
+  primaryActionText: {
     color: "#fff",
-    fontWeight: "bold",
+    fontSize: 16,
   },
-  logoutButton: {
-    backgroundColor: "rgba(255,255,255,0.2)",
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    borderRadius: 5,
-  },
-  logoutText: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
-  actionsContainer: {
+
+  secondaryRow: {
     flexDirection: "row",
-    padding: 15,
-    gap: 10,
+    justifyContent: "space-between",
+    marginTop: 15,
   },
-  actionButton: {
-    flex: 1,
-    backgroundColor: "#7b2ff2",
-    padding: 15,
-    borderRadius: 8,
-    alignItems: "center",
-  },
-  actionButtonSecondary: {
-    backgroundColor: "#fff",
+
+  secondaryAction: {
+    width: "48%",
+    backgroundColor: "#FFFFFF",
+    paddingVertical: 18,
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: "#7b2ff2",
+    borderColor: "#E5E7EB",
+    alignItems: "center",
+    justifyContent: "center",
+    elevation: 2,
   },
-  actionButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
+
+  secondaryText: {
+    marginTop: 6,
+    fontSize: 14,
+    color: "#1E3A8A",
   },
-  actionButtonTextSecondary: {
-    color: "#7b2ff2",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
+
   sectionTitle: {
     fontSize: 20,
-    fontWeight: "bold",
-    paddingHorizontal: 15,
-    paddingTop: 10,
+    paddingHorizontal: 22,
+    paddingTop: 22,
     paddingBottom: 10,
   },
+
   listContainer: {
     padding: 15,
   },
+
   bookingCard: {
-    backgroundColor: "#fff",
-    padding: 15,
-    borderRadius: 8,
-    marginBottom: 10,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    backgroundColor: "#FFFFFF",
+    padding: 20,
+    borderRadius: 20,
+    marginBottom: 16,
+    elevation: 4,
   },
+
   bookingHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 10,
+    marginBottom: 14,
   },
+
   bookingId: {
-    fontSize: 14,
-    fontWeight: "bold",
-    color: "#666",
+    fontSize: 13,
+    color: "#6B7280",
   },
-  status: {
-    fontSize: 12,
-    fontWeight: "bold",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
+
+  routeText: {
+    fontSize: 15,
+    color: "#111827",
+    marginBottom: 8,
   },
-  statuspending: {
-    backgroundColor: "#f3e6ff",
-    color: "#7b2ff2",
+
+  metaText: {
+    fontSize: 13,
+    color: "#6B7280",
   },
-  statusconfirmed: {
-    backgroundColor: "#e6d6fa",
-    color: "#7b2ff2",
+
+  statusBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 20,
+    fontSize: 11,
+    overflow: "hidden",
   },
-  statuscompleted: {
-    backgroundColor: "#d1b3f7",
-    color: "#4b006e",
-  },
-  statuscancelled: {
-    backgroundColor: "#ffe6e6",
-    color: "#b71c1c",
-  },
-  bookingRoute: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 5,
-  },
-  bookingDate: {
-    fontSize: 12,
-    color: "#666",
-  },
-  emptyContainer: {
-    alignItems: "center",
-    paddingTop: 50,
-  },
-  emptyText: {
-    fontSize: 18,
-    color: "#666",
-    marginBottom: 5,
-  },
-  emptySubtext: {
-    fontSize: 14,
-    color: "#999",
-  },
+
+  statusAccepted: { backgroundColor: "#DCFCE7", color: "#166534" },
+  statusPending: { backgroundColor: "#FEF3C7", color: "#92400E" },
+  statusConfirmed: { backgroundColor: "#DBEAFE", color: "#1E40AF" },
+  statusCompleted: { backgroundColor: "#E0F2FE", color: "#075985" },
+  statusCancelled: { backgroundColor: "#FEE2E2", color: "#991B1B" },
+  statusApproved: { backgroundColor: "#EDE9FE", color: "#5B21B6" },
 });

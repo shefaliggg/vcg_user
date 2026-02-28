@@ -19,9 +19,11 @@ import RatingScreen from "../screens/RatingScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import EditProfileScreen from "../screens/EditProfileScreen";
 import ChangePasswordScreen from "../screens/ChangePasswordScreen";
-import CompanyProfileScreen from "../screens/CompanyProfileScreen";
 
-
+import BankTransferScreen from "../screens/BankTransferScreen";
+import NotificationScreen from "../screens/NotificationScreen";
+import ResetPasswordScreen from "../screens/ResetPasswordScreen";
+import { fonts } from "../themes/typography";
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
@@ -54,12 +56,16 @@ export default function AppNavigator() {
       <Stack.Navigator
         screenOptions={{
           headerStyle: {
-            backgroundColor: "#7b2ff2",
+            backgroundColor: "#ffffff",
+            
+            
           },
-          headerTintColor: "#fff",
+          headerTintColor: "#111827",
           headerTitleStyle: {
-            fontWeight: "bold",
+            fontWeight: "600",
+            fontFamily:fonts.bold
           },
+          headerShadowVisible: false,
         }}
         initialRouteName={isAuthenticated ? "Home" : "Login"}
       >
@@ -77,7 +83,13 @@ export default function AppNavigator() {
         <Stack.Screen
           name="ForgotPassword"
           component={ForgotPasswordScreen}
-          options={{ title: "Forgot Password" }}
+          options={{ title: "Forgot Password" ,headerShown: false }}
+          
+        />
+        <Stack.Screen
+          name="ResetPassword"
+          component={ResetPasswordScreen}
+          options={{ title: "Reset Password" ,headerShown: false }}
         />
 
         {/* App Screens */}
@@ -94,22 +106,28 @@ export default function AppNavigator() {
         <Stack.Screen
           name="BookingQuotes"
           component={BookingQuotesScreen}
-          options={{ title: "Quotes" }}
+          options={{ title: "Quotes",headerShown: false }}
         />
         <Stack.Screen
           name="Signature"
           component={SignatureScreen}
-          options={{ title: "Sign Document" }}
+          options={{ title: "Sign Document" ,headerShown:false}}
         />
         <Stack.Screen
           name="MyBookings"
           component={MyBookingsScreen}
-          options={{ title: "My Bookings" }}
+          options={{ title: "Bookings",headerShown: false }}
+          
         />
         <Stack.Screen
           name="Tracking"
           component={TrackingScreen}
-          options={{ title: "Track Shipment" }}
+          options={{ title: "Track Shipment",headerShown: false }}
+        />
+        <Stack.Screen
+          name="Notifications"
+          component={NotificationScreen}
+          options={{ title: "Notifications",headerShown: false }}
         />
         <Stack.Screen
           name="Invoices"
@@ -132,14 +150,20 @@ export default function AppNavigator() {
           options={{ headerShown: false }}
         />
         <Stack.Screen
+          name="notifications"
+          component={NotificationScreen}
+          options={{ title: "Notifications" }}
+        />
+        <Stack.Screen
           name="ChangePassword"
           component={ChangePasswordScreen}
           options={{ headerShown: false }}
         />
+       
         <Stack.Screen
-          name="CompanyProfile"
-          component={CompanyProfileScreen}
-          options={{ title: "Company Profile" }}
+          name="BankTransfer"
+          component={BankTransferScreen}
+          options={{ title: "Bank Transfer Details",headerShown:false }}
         />
       </Stack.Navigator>
     </NavigationContainer>

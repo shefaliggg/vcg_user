@@ -27,10 +27,10 @@ const selectQuote = async (bookingId, quoteIndex) => {
   return res.data;
 };
 
-const userSignRateConfirmation = async (bookingId, signatureUrl) => {
+const userSignRateConfirmation = async (bookingId, signature) => {
   const res = await api.post(
     `/bookings/${bookingId}/rate-confirmation/user-sign`,
-    { signatureUrl }
+    { signature }   // ✅ MATCH BACKEND
   );
   return res.data;
 };
@@ -43,6 +43,7 @@ const driverAcceptRateConfirmation = async (bookingId, signatureUrl) => {
   return res.data;
 };
 
+
 export default {
   createBooking,
   getMyBookings,
@@ -51,4 +52,5 @@ export default {
   selectQuote,
   userSignRateConfirmation,
   driverAcceptRateConfirmation,
+  
 };

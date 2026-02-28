@@ -1,7 +1,9 @@
 
 // Centralized Google Maps Web API key and helpers
+
 import Constants from 'expo-constants';
-export const GOOGLE_MAPS_API_KEY = Constants.manifest?.extra?.GOOGLE_MAPS_API_KEY || process.env.GOOGLE_MAPS_API_KEY;
+// For Expo SDK 49+, use expoConfig
+export const GOOGLE_MAPS_API_KEY = Constants.expoConfig?.extra?.GOOGLE_MAPS_API_KEY;
 
 
 export const geocodeUrl = (address) =>
