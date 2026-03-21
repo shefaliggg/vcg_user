@@ -2,8 +2,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Feather, MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
 import { io } from "socket.io-client";
-import MapView, { Marker, Polyline } from 'react-native-maps';
-import { AnimatedRegion } from 'react-native-maps';
+import { Platform } from 'react-native';
+let MapView, Marker, Polyline, AnimatedRegion;
+if (Platform.OS !== 'web') {
+  MapView = require('react-native-maps').default;
+  Marker = require('react-native-maps').Marker;
+  Polyline = require('react-native-maps').Polyline;
+  AnimatedRegion = require('react-native-maps').AnimatedRegion;
+}
 import polyline from '@mapbox/polyline';
 import { GOOGLE_MAPS_API_KEY } from "../utils/googleMaps";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -435,58 +441,64 @@ export default function TrackingScreen({ route, navigation }) {
 
 
         {(hasDriver || hasPickup || hasDrop) && (
-          <MapView
-            ref={mapRef}
-            style={{
-              height: 260,
-              marginHorizontal: 20,
-              marginTop: 20,
-              borderRadius: 18,
-
-
-            }}
-            initialRegion={{
-              latitude: mapLat,
-              longitude: mapLng,
-              latitudeDelta: 0.05,
-              longitudeDelta: 0.05,
-            }}
-          >
-            {hasDriver && (
-              <Marker.Animated
-                ref={markerRef}
-                zIndex={3}
-                coordinate={{
-                  latitude: location.lat,
-                  longitude: location.lng,
-                }}
-                title="Driver"
-                pinColor="#2196F3"
-              />
-            )}
-            {hasPickup && (
-              <Marker
-                zIndex={2}
-                coordinate={{ latitude: pickup.lat, longitude: pickup.lng }}
-                title="Pickup Location"
-                pinColor="#4CAF50"
-              />
-            )}
-            {hasDrop && (
-              <Marker
-                coordinate={{ latitude: drop.lat, longitude: drop.lng }}
-                title="Drop Location"
-                pinColor="#F44336"
-              />
-            )}
-            {routeCoords.length > 0 && (
-              <Polyline
-                coordinates={routeCoords}
-                strokeWidth={4}
-                strokeColor="#1E3A8A"
-              />
-            )}
-          </MapView>
+          Platform.OS !== 'web' ? (
+            <MapView
+              ref={mapRef}
+              style={{
+                height: 260,
+                marginHorizontal: 20,
+                marginTop: 20,
+                borderRadius: 18,
+              }}
+              initialRegion={{
+                latitude: mapLat,
+                longitude: mapLng,
+                latitudeDelta: 0.05,
+                longitudeDelta: 0.05,
+              }}
+            >
+              {hasDriver && (
+                <Marker.Animated
+                  ref={markerRef}
+                  zIndex={3}
+                  coordinate={{
+                    latitude: location.lat,
+                    longitude: location.lng,
+                  }}
+                  title="Driver"
+                  pinColor="#2196F3"
+                />
+              )}
+              {hasPickup && (
+                <Marker
+                  zIndex={2}
+                  coordinate={{ latitude: pickup.lat, longitude: pickup.lng }}
+                  title="Pickup Location"
+                  pinColor="#4CAF50"
+                />
+              )}
+              {hasDrop && (
+                <Marker
+                  coordinate={{ latitude: drop.lat, longitude: drop.lng }}
+                  title="Drop Location"
+                  pinColor="#F44336"
+                />
+              )}
+              {routeCoords.length > 0 && (
+                <Polyline
+                  coordinates={routeCoords}
+                  strokeWidth={4}
+                  strokeColor="#1E3A8A"
+                />
+              )}
+            </MapView>
+          ) : (
+            <View style={{ height: 260, marginHorizontal: 20, marginTop: 20, borderRadius: 18, alignItems: 'center', justifyContent: 'center', backgroundColor: '#f3f4f6' }}>
+              <Text style={{ color: '#888', fontSize: 16, textAlign: 'center' }}>
+                Map is not supported on web.
+              </Text>
+            </View>
+          )
         )}
 
         {trip.driver && (
