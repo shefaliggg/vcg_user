@@ -1,10 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Platform, Text, View } from 'react-native';
-let MapView, Marker;
-if (Platform.OS !== 'web') {
-  MapView = require('react-native-maps').default;
-  Marker = require('react-native-maps').Marker;
-}
+import { MapView, Marker } from '../shims/react-native-maps';
 import { io } from 'socket.io-client';
 
 const socket = io('http://54.174.219.57:5000');

@@ -3,13 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Feather, MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
 import { io } from "socket.io-client";
 import { Platform } from 'react-native';
-let MapView, Marker, Polyline, AnimatedRegion;
-if (Platform.OS !== 'web') {
-  MapView = require('react-native-maps').default;
-  Marker = require('react-native-maps').Marker;
-  Polyline = require('react-native-maps').Polyline;
-  AnimatedRegion = require('react-native-maps').AnimatedRegion;
-}
+import { MapView, Marker, Polyline } from "../shims/react-native-maps";
 import polyline from '@mapbox/polyline';
 import { GOOGLE_MAPS_API_KEY } from "../utils/googleMaps";
 import AsyncStorage from "@react-native-async-storage/async-storage";
