@@ -10,6 +10,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import AppText from "../components/AppText";
 import api from "../services/api.service";
+import { colors } from "../themes/colors";
 
 export default function NotificationScreen() {
   const [notifications, setNotifications] = useState([]);
@@ -34,7 +35,7 @@ export default function NotificationScreen() {
   if (loading) {
     return (
       <LinearGradient
-        colors={["#1E3A8A", "#2563EB"]}
+        colors={[colors.gradientStart, colors.gradientEnd]}
         style={styles.loadingContainer}
       >
         <ActivityIndicator size="large" color="#fff" />
@@ -44,7 +45,7 @@ export default function NotificationScreen() {
 
   return (
     <LinearGradient
-      colors={["#1E3A8A", "#2563EB"]}
+      colors={[colors.gradientStart, colors.gradientEnd]}
       style={styles.container}
     >
       {/* Header */}
@@ -63,7 +64,7 @@ export default function NotificationScreen() {
           renderItem={({ item }) => (
             <View style={styles.card}>
               <View style={styles.cardHeader}>
-                <Feather name="bell" size={18} color="#1E3A8A" />
+                <Feather name="bell" size={18} color={colors.primary} />
                 <AppText weight="bold" style={styles.title}>
                   {item.title}
                 </AppText>

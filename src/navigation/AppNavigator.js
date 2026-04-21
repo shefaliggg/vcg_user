@@ -24,7 +24,20 @@ import BankTransferScreen from "../screens/BankTransferScreen";
 import NotificationScreen from "../screens/NotificationScreen";
 import ResetPasswordScreen from "../screens/ResetPasswordScreen";
 import { fonts } from "../themes/typography";
+import { colors } from "../themes/colors";
 const Stack = createNativeStackNavigator();
+
+const navTheme = {
+  dark: false,
+  colors: {
+    primary: colors.primary,
+    background: colors.background,
+    card: colors.surface,
+    text: colors.text,
+    border: colors.border,
+    notification: colors.primary,
+  },
+};
 
 export default function AppNavigator() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -52,15 +65,15 @@ export default function AppNavigator() {
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer theme={navTheme}>
       <Stack.Navigator
         screenOptions={{
           headerStyle: {
-            backgroundColor: "#ffffff",
+            backgroundColor: colors.surface,
             
             
           },
-          headerTintColor: "#111827",
+          headerTintColor: colors.text,
           headerTitleStyle: {
             fontWeight: "600",
             fontFamily:fonts.bold

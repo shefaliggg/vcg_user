@@ -55,7 +55,7 @@ export default function RatingScreen({ route, navigation }) {
 
   return (
     <LinearGradient
-      colors={["#1E3A8A", "#2563EB"]}
+      colors={["#F0DBAF", "#7ED7C1"]}
       style={{ flex: 1 }}
     >
       {/* Header */}
@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
 
   confirmButton: {
     flex: 1,
-    backgroundColor: "#1E3A8A",
+    backgroundColor: "#F0DBAF",
     paddingVertical: 16,
     borderRadius: 14,
     alignItems: "center",
@@ -233,3 +233,4 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
 });
+

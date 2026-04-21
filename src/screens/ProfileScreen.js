@@ -78,7 +78,7 @@ const ProfileScreen = () => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#7b2ff2" />
+        <ActivityIndicator size="large" color="#7ED7C1" />
       </View>
     );
   }
@@ -165,7 +165,7 @@ return (
         style={styles.passwordButton}
         onPress={() => navigation.navigate("ChangePassword")}
       >
-        <Icon name="lock" size={20} color="#1E3A8A" style={styles.buttonIcon} />
+        <Icon name="lock" size={20} color="#F0DBAF" style={styles.buttonIcon} />
         <Text style={styles.passwordButtonText}>Change Password</Text>
       </TouchableOpacity>
 
@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5F5F5',
   },
   header: {
-    backgroundColor: "#1E3A8A",
+    backgroundColor: "#F0DBAF",
     paddingTop: 70,
     paddingBottom: 30,
     alignItems: "center",
@@ -262,14 +262,14 @@ const styles = StyleSheet.create({
     paddingVertical: 24,
   },
   editButton: {
-    backgroundColor: "#1E3A8A",
+    backgroundColor: "#F0DBAF",
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
     paddingVertical: 16,
     borderRadius: 14,
     marginBottom: 14,
-    shadowColor: "#1E3A8A",
+    shadowColor: "#F0DBAF",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -286,7 +286,7 @@ const styles = StyleSheet.create({
   passwordButton: {
     backgroundColor: "#fff",
     borderWidth: 1,
-    borderColor: "#1E3A8A",
+    borderColor: "#F0DBAF",
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
@@ -295,7 +295,7 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   passwordButtonText: {
-    color: "#1E3A8A",
+    color: "#F0DBAF",
     fontSize: 15,
     fontWeight: "600",
   },
@@ -318,3 +318,5 @@ const styles = StyleSheet.create({
 });
 
 export default ProfileScreen;
+
+

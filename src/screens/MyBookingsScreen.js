@@ -176,7 +176,7 @@ export default function MyBookingsScreen({ navigation }) {
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#1E3A8A" />
+        <ActivityIndicator size="large" color="#F0DBAF" />
         <AppText weight="semiBold" style={styles.loadingText}>Loading your bookings...</AppText>
       </View>
     );
@@ -325,7 +325,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   createBookingBtn: {
-    backgroundColor: "#1E3A8A",
+    backgroundColor: "#F0DBAF",
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,
@@ -358,7 +358,7 @@ const styles = StyleSheet.create({
   },
 
   newBookingBtn: {
-    backgroundColor: "#1E3A8A",
+    backgroundColor: "#F0DBAF",
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 10,
@@ -418,7 +418,7 @@ const styles = StyleSheet.create({
 
   statusConfirmed: {
     backgroundColor: "#DBEAFE",
-    color: "#1E40AF",
+    color: "#F0DBAF",
   },
 
   statusCompleted: {
@@ -489,7 +489,7 @@ const styles = StyleSheet.create({
 
   viewQuotesBtn: {
     flex: 1,
-    backgroundColor: "#1E3A8A",
+    backgroundColor: "#F0DBAF",
     paddingVertical: 12,
     borderRadius: 12,
     alignItems: "center",
@@ -508,12 +508,14 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#1E3A8A",
+    borderColor: "#F0DBAF",
   },
 
   trackBtnText: {
-    color: "#1E3A8A",
+    color: "#F0DBAF",
     fontSize: 13,
     fontWeight: "600",
   },
 });
+
+

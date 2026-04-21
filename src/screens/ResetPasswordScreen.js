@@ -65,7 +65,7 @@ export default function ResetPasswordScreen({ route, navigation }) {
 
   return (
     <LinearGradient
-      colors={["#1E3A8A", "#2563EB"]}
+      colors={["#F0DBAF", "#7ED7C1"]}
       style={{ flex: 1 }}
     >
       <KeyboardAvoidingView
@@ -80,7 +80,7 @@ export default function ResetPasswordScreen({ route, navigation }) {
           {/* Header */}
           <View style={styles.header}>
             <View style={styles.iconContainer}>
-              <Feather name="shield" size={26} color="#1E3A8A" />
+              <Feather name="shield" size={26} color="#F0DBAF" />
             </View>
 
             <AppText weight="bold" style={styles.title}>
@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F8FAFC",
   },
   otpFocused: {
-    borderColor: "#1E40AF",
+    borderColor: "#F0DBAF",
   },
   input: {
     backgroundColor: "#F8FAFC",
@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   button: {
-    backgroundColor: "#1E40AF",
+    backgroundColor: "#F0DBAF",
     borderRadius: 16,
     paddingVertical: 18,
     alignItems: "center",
@@ -213,3 +213,4 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
 });
+

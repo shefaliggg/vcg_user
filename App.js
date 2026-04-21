@@ -16,6 +16,7 @@ import Constants from 'expo-constants';
 import AppNavigator from "./src/navigation/AppNavigator";
 import { DeviceEventEmitter } from "react-native";
 import { useFonts, Inter_400Regular, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
+import { colors } from "./src/themes/colors";
 export default function App() {
 
   
@@ -57,8 +58,8 @@ export default function App() {
   }
   return (
 
-    <View style={{ flex: 1 }}>
-      <StatusBar barStyle="light-content" backgroundColor="#2196F3" />
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
+      <StatusBar barStyle="light-content" backgroundColor={colors.gradientStart} />
 
       <AppNavigator />
 

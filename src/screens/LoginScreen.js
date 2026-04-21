@@ -17,6 +17,7 @@ import getErrorMessage from "../utils/errorHandler";
 import { registerForPushNotifications } from "../services/push.service";
 import AppText from "../components/AppText";
 import { Pressable } from "react-native";
+import { colors } from "../themes/colors";
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState("");
@@ -26,7 +27,7 @@ export default function LoginScreen({ navigation }) {
   const [showPassword, setShowPassword] = useState(false);
 
   const inputBorder = (field) => ({
-    borderColor: focusedInput === field ? "#1E40AF" : "#E2E8F0",
+    borderColor: focusedInput === field ? colors.primary : colors.border,
     borderWidth: 1,
   });
 
@@ -54,7 +55,7 @@ export default function LoginScreen({ navigation }) {
 
   return (
     <LinearGradient
-      colors={["#1E3A8A", "#2563EB"]}
+      colors={[colors.gradientStart, colors.gradientEnd]}
       style={{ flex: 1 }}
     >
       <KeyboardAvoidingView
@@ -71,7 +72,7 @@ export default function LoginScreen({ navigation }) {
           {/* Header */}
           <View style={styles.header}>
             <View style={styles.iconContainer}>
-              <Feather name="truck" size={28} color="#1E3A8A" />
+              <Feather name="truck" size={28} color={colors.primary} />
             </View>
             <AppText weight="bold" style={styles.title}>
               Welcome back
@@ -240,10 +241,10 @@ const styles = StyleSheet.create({
   },
   forgot: {
     fontSize: 13,
-    color: "#2563EB",
+    color: colors.primary,
   },
   button: {
-    backgroundColor: "#1E40AF",
+    backgroundColor: colors.primary,
     borderRadius: 16,
     paddingVertical: 18,
     alignItems: "center",
@@ -263,6 +264,6 @@ const styles = StyleSheet.create({
     marginRight: 6,
   },
   link: {
-    color: "#1E40AF",
+    color: colors.primary,
   },
 });

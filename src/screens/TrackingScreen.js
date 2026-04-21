@@ -201,19 +201,19 @@ export default function TrackingScreen({ route, navigation }) {
         label: "Going to Pickup",
         iconName: "truck",
         iconLib: "FontAwesome5",
-        color: "#2563eb",
+        color: "#7ED7C1",
       },
       arrived_at_pickup: {
         label: "Arrived at Pickup",
         iconName: "map-pin",
         iconLib: "Feather",
-        color: "#2563eb",
+        color: "#7ED7C1",
       },
       loading: {
         label: "Loading",
         iconName: "archive",
         iconLib: "Feather",
-        color: "#2563eb",
+        color: "#7ED7C1",
       },
       loaded: {
         label: "Loaded",
@@ -328,7 +328,7 @@ export default function TrackingScreen({ route, navigation }) {
     console.log('[TrackingScreen] Loading...');
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#2196F3" />
+        <ActivityIndicator size="large" color="#7ED7C1" />
       </View>
     );
   }
@@ -460,7 +460,7 @@ export default function TrackingScreen({ route, navigation }) {
                     longitude: location.lng,
                   }}
                   title="Driver"
-                  pinColor="#2196F3"
+                  pinColor="#7ED7C1"
                 />
               )}
               {hasPickup && (
@@ -482,7 +482,7 @@ export default function TrackingScreen({ route, navigation }) {
                 <Polyline
                   coordinates={routeCoords}
                   strokeWidth={4}
-                  strokeColor="#1E3A8A"
+                  strokeColor="#F0DBAF"
                 />
               )}
             </MapView>
@@ -610,7 +610,7 @@ export default function TrackingScreen({ route, navigation }) {
         {showRatingModal && (
           <View style={styles.modalOverlay}>
             <View style={styles.modalBox}>
-              <Feather name="star" size={32} color="#1E3A8A" style={{ alignSelf: "center" }} />
+              <Feather name="star" size={32} color="#F0DBAF" style={{ alignSelf: "center" }} />
 
               <AppText weight="bold" style={styles.modalTitle}>
                 Rate Your Driver
@@ -626,7 +626,7 @@ export default function TrackingScreen({ route, navigation }) {
                     <Feather
                       name={star <= rating ? "star" : "star"}
                       size={32}
-                      color={star <= rating ? "#1E3A8A" : "#CBD5E1"}
+                      color={star <= rating ? "#F0DBAF" : "#CBD5E1"}
                       style={{ marginHorizontal: 6 }}
                     />
                   </TouchableOpacity>
@@ -713,7 +713,7 @@ const styles = StyleSheet.create({
   },
 
   submitButton: {
-    backgroundColor: "#1E3A8A",
+    backgroundColor: "#F0DBAF",
     paddingVertical: 14,
     borderRadius: 14,
     alignItems: "center",
@@ -760,7 +760,7 @@ const styles = StyleSheet.create({
   statusTextModern: {
     fontSize: 12,
     fontWeight: "600",
-    color: "#2563eb",
+    color: "#7ED7C1",
   },
 
   headerCenter: {
@@ -850,21 +850,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   timelineDotCompleted: {
-    backgroundColor: "#1E3A8A",
-    borderColor: "#1E3A8A",
+    backgroundColor: "#F0DBAF",
+    borderColor: "#F0DBAF",
   },
 
   timelineDotCurrent: {
-    borderColor: "#1E3A8A",
+    borderColor: "#F0DBAF",
     borderWidth: 3,
   },
 
   timelineLineCompleted: {
-    backgroundColor: "#1E3A8A",
+    backgroundColor: "#F0DBAF",
   },
 
   timelineLabelCurrent: {
-    color: "#1E3A8A",
+    color: "#F0DBAF",
     fontWeight: "700",
   },
   checkmark: {
@@ -929,7 +929,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   button: {
-    backgroundColor: "#7b2ff2",
+    backgroundColor: "#7ED7C1",
     paddingHorizontal: 30,
     paddingVertical: 12,
     borderRadius: 8,
@@ -945,3 +945,5 @@ const styles = StyleSheet.create({
 
  
 });
+
+

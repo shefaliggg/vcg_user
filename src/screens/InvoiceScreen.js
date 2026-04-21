@@ -190,7 +190,7 @@ const handlePayment = async (invoiceId, method = "online") => {
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#1E3A8A" />
+        <ActivityIndicator size="large" color="#F0DBAF" />
       </View>
     );
   }
@@ -200,7 +200,7 @@ const handlePayment = async (invoiceId, method = "online") => {
       {/* STATUS BAR */}
       <StatusBar
         barStyle="light-content"
-        backgroundColor="#1E3A8A"
+        backgroundColor="#F0DBAF"
       />
 
       {/* HEADER */}
@@ -246,7 +246,7 @@ const styles = StyleSheet.create({
   },
 
   header: {
-    backgroundColor: "#1E3A8A",
+    backgroundColor: "#F0DBAF",
     paddingTop: 43,
     paddingBottom: 20,
     paddingHorizontal: 20,
@@ -302,7 +302,7 @@ const styles = StyleSheet.create({
   amount: {
     fontSize: 22,
     fontWeight: "700",
-    color: "#1E3A8A",
+    color: "#F0DBAF",
     marginTop: 8,
   },
 
@@ -345,7 +345,7 @@ const styles = StyleSheet.create({
   },
 
   primaryButton: {
-    backgroundColor: "#1E3A8A",
+    backgroundColor: "#F0DBAF",
     paddingVertical: 14,
     borderRadius: 14,
     alignItems: "center",
@@ -358,7 +358,7 @@ const styles = StyleSheet.create({
 
   secondaryButton: {
     borderWidth: 1,
-    borderColor: "#1E3A8A",
+    borderColor: "#F0DBAF",
     paddingVertical: 14,
     borderRadius: 14,
     alignItems: "center",
@@ -366,7 +366,7 @@ const styles = StyleSheet.create({
   },
 
   secondaryButtonText: {
-    color: "#1E3A8A",
+    color: "#F0DBAF",
     fontWeight: "600",
   },
 
@@ -379,3 +379,4 @@ const styles = StyleSheet.create({
     color: "#64748B",
   },
 });
+

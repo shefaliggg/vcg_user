@@ -13,6 +13,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import AppText from "../components/AppText";
 import invoiceService from "../services/invoice.service";
+import { colors } from "../themes/colors";
 
 export default function BankTransferScreen({ route, navigation }) {
   const { invoiceId, bankDetails } = route.params || {};
@@ -43,8 +44,8 @@ export default function BankTransferScreen({ route, navigation }) {
 };
 
   return (
-    <LinearGradient colors={["#1E3A8A", "#2563EB"]} style={{ flex: 1 }}>
-      <StatusBar barStyle="light-content" backgroundColor="#1E3A8A" />
+    <LinearGradient colors={[colors.gradientStart, colors.gradientEnd]} style={{ flex: 1 }}>
+      <StatusBar barStyle="light-content" backgroundColor={colors.gradientStart} />
 
       {/* HEADER */}
       <View style={styles.header}>
@@ -210,14 +211,14 @@ const styles = StyleSheet.create({
 
   amount: {
     fontSize: 18,
-    color: "#1E3A8A",
+    color: colors.primary,
   },
 
   copyButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#1E3A8A",
+    backgroundColor: colors.primary,
     paddingVertical: 16,
     borderRadius: 16,
     marginTop: 20,

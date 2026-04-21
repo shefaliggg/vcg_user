@@ -153,7 +153,7 @@ export default function HomeScreen({ navigation }) {
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#1E3A8A" />
+        <ActivityIndicator size="large" color="#F0DBAF" />
       </View>
     );
   }
@@ -217,7 +217,7 @@ export default function HomeScreen({ navigation }) {
             style={styles.secondaryAction}
             onPress={() => navigation.navigate("MyBookings")}
           >
-            <MaterialIcons name="list-alt" size={18} color="#1E3A8A" />
+            <MaterialIcons name="list-alt" size={18} color="#F0DBAF" />
             <AppText weight="semiBold" style={styles.secondaryText}>
               All Bookings
             </AppText>
@@ -227,7 +227,7 @@ export default function HomeScreen({ navigation }) {
             style={styles.secondaryAction}
             onPress={() => navigation.navigate("Invoices")}
           >
-            <MaterialIcons name="receipt" size={18} color="#1E3A8A" />
+            <MaterialIcons name="receipt" size={18} color="#F0DBAF" />
             <AppText weight="semiBold" style={styles.secondaryText}>
               Invoices
             </AppText>
@@ -319,7 +319,7 @@ const styles = StyleSheet.create({
   },
 
   primaryAction: {
-    backgroundColor: "#1E3A8A",
+    backgroundColor: "#F0DBAF",
     padding: 16,
     borderRadius: 14,
     flexDirection: "row",
@@ -354,7 +354,7 @@ const styles = StyleSheet.create({
   secondaryText: {
     marginTop: 6,
     fontSize: 14,
-    color: "#1E3A8A",
+    color: "#F0DBAF",
   },
 
   sectionTitle: {
@@ -409,8 +409,9 @@ const styles = StyleSheet.create({
 
   statusAccepted: { backgroundColor: "#DCFCE7", color: "#166534" },
   statusPending: { backgroundColor: "#FEF3C7", color: "#92400E" },
-  statusConfirmed: { backgroundColor: "#DBEAFE", color: "#1E40AF" },
+  statusConfirmed: { backgroundColor: "#DBEAFE", color: "#F0DBAF" },
   statusCompleted: { backgroundColor: "#E0F2FE", color: "#075985" },
   statusCancelled: { backgroundColor: "#FEE2E2", color: "#991B1B" },
   statusApproved: { backgroundColor: "#EDE9FE", color: "#5B21B6" },
 });
+

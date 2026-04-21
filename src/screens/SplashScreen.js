@@ -29,7 +29,7 @@ export default function SplashScreen() {
 
   return (
     <LinearGradient
-      colors={["#1E3A8A", "#2563EB"]}
+      colors={["#F0DBAF", "#7ED7C1"]}
       style={styles.container}
     >
       <Animated.View
@@ -44,7 +44,7 @@ export default function SplashScreen() {
         {/* Logo Circle */}
         <View style={styles.logoWrapper}>
           <View style={styles.logoCircle}>
-            <Feather name="truck" size={44} color="#1E3A8A" />
+            <Feather name="truck" size={44} color="#F0DBAF" />
           </View>
         </View>
 
@@ -150,3 +150,5 @@ const styles = StyleSheet.create({
   alignItems: "center",
 },
 });
+
+

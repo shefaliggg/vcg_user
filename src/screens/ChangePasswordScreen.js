@@ -16,6 +16,7 @@ import userService from '../services/user.service';
 
 import { LinearGradient } from 'expo-linear-gradient';
 import AppText from '../components/AppText';
+import { colors } from '../themes/colors';
 
 const ChangePasswordScreen = () => {
   const navigation = useNavigation();
@@ -117,7 +118,7 @@ const ChangePasswordScreen = () => {
 
   return (
     <LinearGradient
-      colors={['#1E3A8A', '#2563EB']}
+      colors={[colors.gradientStart, colors.gradientEnd]}
       style={{ flex: 1 }}
     >
       <ScrollView
@@ -312,7 +313,7 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   saveButton: {
-    backgroundColor: '#1E40AF',
+    backgroundColor: '#F0DBAF',
     paddingVertical: 18,
     borderRadius: 16,
     alignItems: 'center',
@@ -328,3 +329,5 @@ const styles = StyleSheet.create({
 });
 
 export default ChangePasswordScreen;
+
+

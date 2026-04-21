@@ -60,7 +60,7 @@ export default function SignatureScreen({ route, navigation }) {
 
   return (
     <SafeAreaView style={styles.safeContainer} edges={["top", "bottom"]}>
-      <StatusBar barStyle="light-content" backgroundColor="#1E3A8A" />
+      <StatusBar barStyle="light-content" backgroundColor="#F0DBAF" />
 
       {/* HEADER */}
       <View style={styles.header}>
@@ -79,7 +79,7 @@ export default function SignatureScreen({ route, navigation }) {
       </View>
 
       <View style={styles.subHeader}>
-        <Feather name="edit-3" size={16} color="#1E3A8A" />
+        <Feather name="edit-3" size={16} color="#F0DBAF" />
         <AppText style={styles.subText}>
           Please sign below to accept the rate
         </AppText>
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
   },
 
   header: {
-    backgroundColor: "#1E3A8A",
+    backgroundColor: "#F0DBAF",
     paddingTop: Platform.OS === "android" ? 20 : 10,
     paddingBottom: 20,
     paddingHorizontal: 20,
@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     overflow: "hidden",
     borderWidth: 2,
-    borderColor: "#1E3A8A",
+    borderColor: "#F0DBAF",
   },
 
   buttonContainer: {
@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#1E3A8A",
+    backgroundColor: "#F0DBAF",
     paddingVertical: 14,
     borderRadius: 14,
   },
@@ -227,3 +227,4 @@ const styles = StyleSheet.create({
     marginLeft: 6,
   },
 });
+

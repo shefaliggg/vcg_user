@@ -390,12 +390,12 @@ const styles = StyleSheet.create({
     textAlignVertical: "top",
   },
   button: {
-    backgroundColor: "#1E3A8A",
+    backgroundColor: "#F0DBAF",
     borderRadius: 14,
     paddingVertical: 16,
     alignItems: "center",
     marginTop: 25,
-    shadowColor: "#7b2ff2",
+    shadowColor: "#7ED7C1",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -448,3 +448,4 @@ const styles = StyleSheet.create({
     color: "#111827",
   },
 });
+

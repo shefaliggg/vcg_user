@@ -20,6 +20,7 @@ import { Feather } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 import AppText from "../components/AppText";
 import { fonts } from "../themes/typography";
+import { colors } from "../themes/colors";
 const { width } = Dimensions.get('window');
 
 export default function RegisterScreen({ navigation }) {
@@ -95,7 +96,7 @@ export default function RegisterScreen({ navigation }) {
   };
 
   const inputBorder = (field) => ({
-    borderColor: focusedInput === field ? "#0F2E73" : "rgba(255,255,255,0.4)",
+    borderColor: focusedInput === field ? colors.primary : "rgba(255,255,255,0.45)",
     borderWidth: 1,
   });
 
@@ -103,7 +104,7 @@ export default function RegisterScreen({ navigation }) {
 
   return (
 
-    <View style={{ flex: 1, backgroundColor: "#F5F7FB" }}>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.keyboardView}
@@ -114,12 +115,12 @@ export default function RegisterScreen({ navigation }) {
           bounces={false}
         >
           <LinearGradient
-            colors={['#1E3A8A', '#2563EB']}
+            colors={[colors.gradientStart, colors.gradientEnd]}
             style={styles.topSection}
           >
             <View style={styles.header}>
               <View style={styles.iconWrapper}>
-                <Feather name="truck" size={32} color="#1E3A8A" />
+                <Feather name="truck" size={32} color={colors.primary} />
               </View>
               <AppText weight="bold" style={styles.title}>Create account</AppText>
               <AppText weight="semiBold" style={styles.subtitle}>Join VCG Transport today</AppText>
@@ -182,7 +183,7 @@ export default function RegisterScreen({ navigation }) {
                     selectedValue={formData.countryCode}
                     onValueChange={(value) => handleChange("countryCode", value)}
                     style={{ height: 50, fontFamily: fonts.regular }}
-                    dropdownIconColor="#1E3A8A"
+                    dropdownIconColor={colors.primary}
                   >
                     <Picker.Item label="+91 (India)" value="+91" />
                     <Picker.Item label="+1 (USA)" value="+1" />
@@ -221,7 +222,7 @@ export default function RegisterScreen({ navigation }) {
                   <Feather
                     name={showPassword ? "eye-off" : "eye"}
                     size={20}
-                    color="#1E3A8A"
+                    color={colors.primary}
                   />
                 </TouchableOpacity>
               </View>
@@ -245,7 +246,7 @@ export default function RegisterScreen({ navigation }) {
                   <Feather
                     name={showConfirmPassword ? "eye-off" : "eye"}
                     size={20}
-                    color="#1E3A8A"
+                    color={colors.primary}
                   />
                 </TouchableOpacity>
               </View>
@@ -257,7 +258,7 @@ export default function RegisterScreen({ navigation }) {
               activeOpacity={0.9}
             >
               <LinearGradient
-                colors={['#1E3A8A', '#2563EB']}
+                colors={[colors.primaryDark, colors.primary]}
                 style={styles.button}
               >
                 {loading ? (
@@ -381,7 +382,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     padding:20,
     fontSize: 15,
-    color: "#1E3A8A",
+    color: colors.text,
     fontFamily: fonts.regular,
   },
  button: {
@@ -411,7 +412,7 @@ const styles = StyleSheet.create({
     marginRight: 6,
   },
   linkText: {
-    color: "#900101",
+    color: colors.primary,
     fontSize: 13,
     fontWeight: "700",
     textDecorationLine: "underline",
@@ -431,6 +432,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   segmentTextActive: {
-    color: '#1E3A8A',
+    color: colors.primary,
   },
 });

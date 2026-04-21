@@ -122,7 +122,7 @@ const selectedDriverName =
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#7b2ff2" />
+        <ActivityIndicator size="large" color="#7ED7C1" />
         <AppText weight="semiBold" style={styles.loadingText}>Loading booking...</AppText>
       </View>
     );
@@ -290,7 +290,7 @@ headerBack: {
     marginBottom: 20,
   },
   bookingHeader: {
-    backgroundColor: "#1E3A8A",
+    backgroundColor: "#F0DBAF",
     paddingTop: 55,
     paddingBottom: 25,
     paddingHorizontal: 20,
@@ -357,7 +357,7 @@ headerBack: {
   },
 
   viewPdfButton: {
-    backgroundColor: "#1E3A8A",
+    backgroundColor: "#F0DBAF",
     borderRadius: 14,
     paddingVertical: 14,
     alignItems: "center",
@@ -411,7 +411,7 @@ headerBack: {
   selectedAmount: {
     fontSize: 28,
     fontWeight: "700",
-    color: "#1E3A8A",
+    color: "#F0DBAF",
     marginVertical: 6,
   },
   pdfUrl: {
@@ -456,7 +456,7 @@ headerBack: {
   amount: {
     fontSize: 20,
     fontWeight: "700",
-    color: "#1E3A8A",
+    color: "#F0DBAF",
     marginBottom: 6,
   },
   notes: {
@@ -469,7 +469,7 @@ headerBack: {
     color: "#999",
   },
   selectButton: {
-    backgroundColor: "#1E3A8A",
+    backgroundColor: "#F0DBAF",
     borderRadius: 12,
     paddingVertical: 12,
     alignItems: "center",
@@ -523,7 +523,7 @@ headerBack: {
     color: "#666",
   },
   backButton: {
-    backgroundColor: "#7b2ff2",
+    backgroundColor: "#7ED7C1",
     borderRadius: 8,
     paddingHorizontal: 20,
     paddingVertical: 10,
@@ -539,3 +539,4 @@ headerBack: {
     color: "#6B7280",
   },
 });
+

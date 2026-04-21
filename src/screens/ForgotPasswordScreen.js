@@ -14,6 +14,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import authService from "../services/auth.service";
 import AppText from "../components/AppText";
+import { colors } from "../themes/colors";
 
 export default function ForgotPasswordScreen({ navigation }) {
   const [email, setEmail] = useState("");
@@ -21,7 +22,7 @@ export default function ForgotPasswordScreen({ navigation }) {
   const [focusedInput, setFocusedInput] = useState(null);
 
   const inputBorder = (field) => ({
-    borderColor: focusedInput === field ? "#1E40AF" : "#E2E8F0",
+    borderColor: focusedInput === field ? colors.primary : colors.border,
     borderWidth: 1,
   });
 
@@ -45,7 +46,7 @@ export default function ForgotPasswordScreen({ navigation }) {
 
   return (
     <LinearGradient
-      colors={["#1E3A8A", "#2563EB"]}
+      colors={[colors.gradientStart, colors.gradientEnd]}
       style={{ flex: 1 }}
     >
       <KeyboardAvoidingView
@@ -61,7 +62,7 @@ export default function ForgotPasswordScreen({ navigation }) {
           {/* Header */}
           <View style={styles.header}>
             <View style={styles.iconContainer}>
-              <Feather name="lock" size={26} color="#1E3A8A" />
+              <Feather name="lock" size={26} color={colors.primary} />
             </View>
 
             <AppText weight="bold" style={styles.title}>
@@ -170,7 +171,7 @@ const styles = StyleSheet.create({
     color: "#1E293B",
   },
   button: {
-    backgroundColor: "#1E40AF",
+    backgroundColor: colors.primary,
     borderRadius: 16,
     paddingVertical: 18,
     alignItems: "center",
@@ -182,6 +183,6 @@ const styles = StyleSheet.create({
   },
   backLink: {
     textAlign: "center",
-    color: "#2563EB",
+    color: colors.primary,
   },
 });
