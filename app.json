@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "TruckUser",
+    "name": "CP Shipper",
     "slug": "TruckUser",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -72,7 +72,8 @@
             "usesCleartextTraffic": true
           }
         }
-      ]
+      ],
+      "@react-native-community/datetimepicker"
     ],
     "experiments": {
       "typedRoutes": true,

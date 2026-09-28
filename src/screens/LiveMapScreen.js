@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { Platform, Text, View } from 'react-native';
 import { MapView, Marker } from '../shims/react-native-maps';
 import { io } from 'socket.io-client';
+import { API_ORIGIN } from '../config/api.config';
 
-const socket = io('http://54.174.219.57:5000');
+const socket = io(API_ORIGIN);
 
 export default function LiveMapScreen({ route }) {
   const { bookingId } = route.params;

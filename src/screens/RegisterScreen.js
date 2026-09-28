@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   StyleSheet,
   Alert,
@@ -12,16 +11,21 @@ import {
   ScrollView,
   Dimensions,
 } from "react-native";
-import { LinearGradient } from 'expo-linear-gradient';
 import authService from "../services/auth.service";
 import getErrorMessage from "../utils/errorHandler";
 import { Animated } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import { Picker } from "@react-native-picker/picker";
 import AppText from "../components/AppText";
-import { fonts } from "../themes/typography";
+import FormInput from "../components/FormInput";
+import { fonts, textStyles } from "../themes/typography";
 import { colors } from "../themes/colors";
+import { spacing } from "../themes/spacing";
+import { radius } from "../themes/radius";
+import { shadows } from "../themes/shadows";
 const { width } = Dimensions.get('window');
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PHONE_REGEX = /^[0-9()\-\s+]{7,}$/;
 
 export default function RegisterScreen({ navigation }) {
 
@@ -32,73 +36,81 @@ export default function RegisterScreen({ navigation }) {
     password: "",
     confirmPassword: "",
     phone: "",
-    countryCode: "+91",
+    countryCode: "+1",
   });
 
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [focusedInput, setFocusedInput] = useState(null);
+  const [errors, setErrors] = useState({});
+
+  const validators = {
+    firstName: (v) => (!v.trim() ? "Required" : null),
+    lastName: (v) => (!v.trim() ? "Required" : null),
+    email: (v) => {
+      if (!v.trim()) return "Required";
+      if (!EMAIL_REGEX.test(v.trim())) return "Enter a valid email address";
+      return null;
+    },
+    phone: (v) => {
+      if (!v.trim()) return "Required";
+      if (!PHONE_REGEX.test(v.trim())) return "Enter a valid phone number";
+      return null;
+    },
+    password: (v) => {
+      if (!v) return "Required";
+      if (v.length < 6) return "Must be at least 6 characters";
+      return null;
+    },
+    confirmPassword: (v, data) => {
+      if (!v) return "Required";
+      if (v !== data.password) return "Passwords do not match";
+      return null;
+    },
+  };
 
   const handleChange = (field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormData((prev) => {
+      const next = { ...prev, [field]: value };
+      if (errors[field] && !validators[field](value, next)) {
+        setErrors((prevErrors) => ({ ...prevErrors, [field]: undefined }));
+      }
+      // Re-validate confirmPassword live when password changes, so a
+      // previously-flagged mismatch clears as soon as they line up again.
+      if (field === "password" && errors.confirmPassword && !validators.confirmPassword(next.confirmPassword, next)) {
+        setErrors((prevErrors) => ({ ...prevErrors, confirmPassword: undefined }));
+      }
+      return next;
+    });
   };
 
   const handleRegister = async () => {
     const { firstName, lastName, email, password, phone } = formData;
 
-    // Client-side validation
-    if (!firstName.trim()) {
-      Alert.alert("Validation Error", "Please enter your first name.");
-      return;
-    }
-    if (!lastName.trim()) {
-      Alert.alert("Validation Error", "Please enter your last name.");
-      return;
-    }
-    if (!email.trim()) {
-      Alert.alert("Validation Error", "Please enter your email address.");
-      return;
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      Alert.alert("Validation Error", "Please enter a valid email address.");
-      return;
-    }
-    if (!phone.trim()) {
-      Alert.alert("Validation Error", "Please enter your phone number.");
-      return;
-    }
-    if (!password) {
-      Alert.alert("Validation Error", "Please enter a password.");
-      return;
-    }
-    if (password !== formData.confirmPassword) {
-      Alert.alert("Validation Error", "Passwords do not match.");
-      return;
-    }
-    if (password.length < 6) {
-      Alert.alert("Validation Error", "Password must be at least 6 characters long.");
-      return;
-    }
+    const nextErrors = {};
+    Object.keys(validators).forEach((field) => {
+      const message = validators[field](formData[field], formData);
+      if (message) nextErrors[field] = message;
+    });
 
+    if (Object.keys(nextErrors).length > 0) {
+      setErrors(nextErrors);
+      return;
+    }
+    setErrors({});
 
     setLoading(true);
     try {
       const user = await authService.register({ firstName, lastName, email, password, phone, role: 'user' });
-      Alert.alert("Success", "Registration successful! Welcome to VCG Transport.");
+      Alert.alert("Success", "Registration successful! Welcome to CP Shipper.");
       navigation.replace("Home");
     } catch (error) {
       const friendlyMessage = getErrorMessage(error);
-      Alert.alert("Registration Error", friendlyMessage,error.message);
+      Alert.alert("Registration Error", friendlyMessage);
     } finally {
       setLoading(false);
     }
   };
-
-  const inputBorder = (field) => ({
-    borderColor: focusedInput === field ? colors.primary : "rgba(255,255,255,0.45)",
-    borderWidth: 1,
-  });
 
 
 
@@ -114,110 +126,81 @@ export default function RegisterScreen({ navigation }) {
           showsVerticalScrollIndicator={false}
           bounces={false}
         >
-          <LinearGradient
-            colors={[colors.gradientStart, colors.gradientEnd]}
-            style={styles.topSection}
+          <View
+            style={[styles.topSection, { backgroundColor: colors.primary }]}
           >
             <View style={styles.header}>
               <View style={styles.iconWrapper}>
                 <Feather name="truck" size={32} color={colors.primary} />
               </View>
-              <AppText weight="bold" style={styles.title}>Create account</AppText>
-              <AppText weight="semiBold" style={styles.subtitle}>Join VCG Transport today</AppText>
+              <AppText variant="screenTitle" style={styles.title}>Create account</AppText>
+              <AppText weight="semiBold" style={styles.subtitle}>Join CP Shipper today</AppText>
             </View>
 
-          </LinearGradient>
+          </View>
 
           <View style={styles.card}>
             <View style={{ flexDirection: 'row', gap: 12 }}>
-              <View style={[styles.inputContainer, { flex: 1 }]}>
-                <AppText weight="semiBold" style={styles.label}>First Name</AppText>
-                <TextInput
-                  onFocus={() => setFocusedInput("firstName")}
-                  onBlur={() => setFocusedInput(null)}
-                  style={[styles.input, inputBorder("firstName")]}
-                  placeholder="John"
-                  placeholderTextColor="#999"
-                  value={formData.firstName}
-                  onChangeText={(value) => handleChange("firstName", value)}
-                  editable={!loading}
-                />
-              </View>
-              <View style={[styles.inputContainer, { flex: 1 }]}>
-                <AppText weight="semiBold" style={styles.label}>Last Name</AppText>
-                <TextInput
-                  onFocus={() => setFocusedInput("lastName")}
-                  onBlur={() => setFocusedInput(null)}
-                  style={[styles.input, inputBorder("lastName")]}
-                  placeholder="Doe"
-                  placeholderTextColor="#999"
-                  value={formData.lastName}
-                  onChangeText={(value) => handleChange("lastName", value)}
-                  editable={!loading}
-                />
-              </View>
-            </View>
-
-            <View style={styles.inputContainer}>
-              <AppText weight="semiBold" style={styles.label}>Email</AppText>
-              <TextInput
-                onFocus={() => setFocusedInput("email")}
-                onBlur={() => setFocusedInput(null)}
-                style={[styles.input, inputBorder("email")]}
-                placeholder="Enter your email"
-                placeholderTextColor="#999"
-                value={formData.email}
-                onChangeText={(value) => handleChange("email", value)}
-                keyboardType="email-address"
-                autoCapitalize="none"
+              <FormInput
+                label="First Name"
+                placeholder="John"
+                value={formData.firstName}
+                onChangeText={(value) => handleChange("firstName", value)}
+                error={errors.firstName}
                 editable={!loading}
+                containerStyle={{ flex: 1 }}
+              />
+              <FormInput
+                label="Last Name"
+                placeholder="Doe"
+                value={formData.lastName}
+                onChangeText={(value) => handleChange("lastName", value)}
+                error={errors.lastName}
+                editable={!loading}
+                containerStyle={{ flex: 1 }}
               />
             </View>
 
+            <FormInput
+              label="Email"
+              placeholder="Enter your email"
+              value={formData.email}
+              onChangeText={(value) => handleChange("email", value)}
+              error={errors.email}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              editable={!loading}
+            />
+
             <View style={styles.inputContainer}>
-              <AppText weight="semiBold" style={styles.label}>Phone</AppText>
+              <AppText variant="label" style={styles.label}>Phone</AppText>
 
               <View style={styles.phoneRow}>
-                <View style={styles.countryPicker}>
-                  <Picker
-                    selectedValue={formData.countryCode}
-                    onValueChange={(value) => handleChange("countryCode", value)}
-                    style={{ height: 50, fontFamily: fonts.regular }}
-                    dropdownIconColor={colors.primary}
-                  >
-                    <Picker.Item label="+91 (India)" value="+91" />
-                    <Picker.Item label="+1 (USA)" value="+1" />
-                    <Picker.Item label="+971 (UAE)" value="+971" />
-                  </Picker>
+                <View style={[styles.countryPicker, styles.countryCodeStatic]}>
+                  <AppText weight="semiBold" style={styles.countryCodeText}>🇺🇸 +1</AppText>
                 </View>
 
-                <TextInput
-                  onFocus={() => setFocusedInput("phone")}
-                  onBlur={() => setFocusedInput(null)}
-                  style={[styles.input, { flex: 1 }, inputBorder("phone")]}
-                  placeholder="Phone number"
+                <FormInput
+                  placeholder="(555) 123-4567"
                   keyboardType="phone-pad"
                   value={formData.phone}
                   onChangeText={(value) => handleChange("phone", value)}
-
+                  error={errors.phone}
+                  editable={!loading}
+                  containerStyle={{ flex: 1, marginBottom: 0 }}
                 />
               </View>
             </View>
 
-            <View style={styles.inputContainer}>
-              <AppText weight="semiBold" style={styles.label}>Password</AppText>
-
-              <View style={styles.passwordContainer}>
-                <TextInput
-                  style={[styles.input, { flex: 1 }, inputBorder("password")]}
-                  placeholder="Create a password"
-                  secureTextEntry={!showPassword}
-                  value={formData.password}
-                  onChangeText={(value) => handleChange("password", value)}
-                  onFocus={() => setFocusedInput("password")}
-                  onBlur={() => setFocusedInput(null)}
-                />
-
+            <FormInput
+              label="Password"
+              placeholder="Create a password"
+              secureTextEntry={!showPassword}
+              value={formData.password}
+              onChangeText={(value) => handleChange("password", value)}
+              error={errors.password}
+              editable={!loading}
+              rightElement={
                 <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
                   <Feather
                     name={showPassword ? "eye-off" : "eye"}
@@ -225,23 +208,18 @@ export default function RegisterScreen({ navigation }) {
                     color={colors.primary}
                   />
                 </TouchableOpacity>
-              </View>
-            </View>
+              }
+            />
 
-            <View style={styles.inputContainer}>
-              <AppText weight="semiBold" style={styles.label}>Confirm Password</AppText>
-
-              <View style={styles.passwordContainer}>
-                <TextInput
-                  style={[styles.input, { flex: 1 }, inputBorder("confirmPassword")]}
-                  placeholder="Confirm password"
-                  secureTextEntry={!showConfirmPassword}
-                  value={formData.confirmPassword}
-                  onChangeText={(value) => handleChange("confirmPassword", value)}
-                  onFocus={() => setFocusedInput("confirmPassword")}
-                  onBlur={() => setFocusedInput(null)}
-                />
-
+            <FormInput
+              label="Confirm Password"
+              placeholder="Confirm password"
+              secureTextEntry={!showConfirmPassword}
+              value={formData.confirmPassword}
+              onChangeText={(value) => handleChange("confirmPassword", value)}
+              error={errors.confirmPassword}
+              editable={!loading}
+              rightElement={
                 <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
                   <Feather
                     name={showConfirmPassword ? "eye-off" : "eye"}
@@ -249,26 +227,25 @@ export default function RegisterScreen({ navigation }) {
                     color={colors.primary}
                   />
                 </TouchableOpacity>
-              </View>
-            </View>
+              }
+            />
 
             <TouchableOpacity
               disabled={loading}
               onPress={handleRegister}
               activeOpacity={0.9}
             >
-              <LinearGradient
-                colors={[colors.primaryDark, colors.primary]}
-                style={styles.button}
+              <View
+                style={[styles.button, { backgroundColor: colors.primary }]}
               >
                 {loading ? (
-                  <ActivityIndicator color="#fff" />
+                  <ActivityIndicator color={colors.white} />
                 ) : (
-                  <AppText weight="bold" style={styles.buttonText}>
+                  <AppText variant="button" style={styles.buttonText}>
                     Create Account
                   </AppText>
                 )}
-              </LinearGradient>
+              </View>
             </TouchableOpacity>
 
             <View style={styles.footer}>
@@ -294,20 +271,37 @@ const styles = StyleSheet.create({
   },
 
   countryPicker: {
-    backgroundColor: "#fff",
-    borderRadius: 14,
+    backgroundColor: colors.surface,
+    borderRadius: radius.input,
     width: 120,
-    
+
     justifyContent: "center",
     fontFamily: fonts.regular,
+  },
+
+  countryCodeStatic: {
+    height: 50,
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
+  },
+
+  countryCodeText: {
+    fontSize: 15,
+    color: colors.text,
   },
 
   passwordContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff",
-    borderRadius: 14,
-    paddingHorizontal: 14,
+    backgroundColor: colors.surface,
+    borderRadius: radius.input,
+    paddingHorizontal: spacing.base,
+  },
+  errorText: {
+    color: colors.error,
+    marginBottom: spacing.sm,
+    textAlign: "center",
   },
   gradient: {
     flex: 1,
@@ -322,12 +316,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   header: {
-    marginTop: 80,
-    marginBottom: 40,
+    marginTop: spacing.xl,
+    marginBottom: spacing.xxxl,
     alignItems: "center",
   },
   topSection: {
-    paddingTop: 100,
+    paddingTop: spacing.huge,
     paddingBottom: 60,
     alignItems: "center",
     borderBottomLeftRadius: 30,
@@ -335,26 +329,22 @@ const styles = StyleSheet.create({
   },
 
   card: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     marginTop: -40,
-    marginHorizontal: 20,
-    borderRadius: 20,
-    padding: 24,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.1,
-    shadowRadius: 20,
-    elevation: 8,
+    marginHorizontal: spacing.lg,
+    borderRadius: radius.card,
+    padding: spacing.base,
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...shadows.card,
   },
   emoji: {
     fontSize: 48,
-    marginBottom: 24,
+    marginBottom: spacing.xl,
   },
   title: {
-    fontSize: 30,
-    fontWeight: "600",
-    color: "#fff",
-    marginBottom: 6,
+    color: colors.white,
+    marginBottom: spacing.xs,
 
   },
   subtitle: {
@@ -366,50 +356,45 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   inputContainer: {
-    marginBottom: 20,
+    marginBottom: spacing.lg,
   },
   label: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#fff",
-    marginBottom: 8,
+    marginBottom: spacing.sm,
+    color: colors.text,
     letterSpacing: 0.2,
   },
   input: {
-    backgroundColor: "#F8FAFC",
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    padding:20,
+    backgroundColor: colors.background,
+    borderRadius: radius.input,
+    paddingHorizontal: spacing.base,
+    paddingVertical: spacing.base,
     fontSize: 15,
     color: colors.text,
     fontFamily: fonts.regular,
   },
  button: {
-  borderRadius: 14,
-  paddingVertical: 16,
+  borderRadius: radius.button,
+  paddingVertical: spacing.base,
   alignItems: "center",
-  marginTop: 20,
+  marginTop: spacing.lg,
 },
   buttonDisabled: {
     backgroundColor: "rgba(255, 255, 255, 0.5)",
     shadowOpacity: 0,
   },
   buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "700",
+    color: colors.white,
   },
   footer: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 28,
+    marginTop: spacing.xxl,
   },
   footerText: {
-    color: "rgba(3, 0, 152, 0.8)",
+    color: colors.textMuted,
     fontSize: 13,
-    marginRight: 6,
+    marginRight: spacing.sm,
   },
   linkText: {
     color: colors.primary,
@@ -420,15 +405,15 @@ const styles = StyleSheet.create({
   segment: {
     flex: 1,
     backgroundColor: 'rgba(255,255,255,0.3)',
-    paddingVertical: 12,
-    borderRadius: 12,
+    paddingVertical: spacing.md,
+    borderRadius: radius.button,
     alignItems: 'center',
   },
   segmentActive: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
   },
   segmentText: {
-    color: '#fff',
+    color: colors.white,
     fontWeight: '700',
   },
   segmentTextActive: {

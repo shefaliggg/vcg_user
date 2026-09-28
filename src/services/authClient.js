@@ -1,9 +1,8 @@
 import axios from 'axios';
-
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://54.174.219.57:5000';
+import { API_ORIGIN } from '../config/api.config';
 
 const client = axios.create({
-  baseURL: API_URL,
+  baseURL: API_ORIGIN,
   headers: {
     'Content-Type': 'application/json',
   },

@@ -12,6 +12,26 @@ import bookingService from "../services/booking.service";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AppText from "../components/AppText";
+import { colors } from "../themes/colors";
+import { spacing } from "../themes/spacing";
+import { radius } from "../themes/radius";
+import { shadows } from "../themes/shadows";
+
+const STATUS_ICON = {
+  ACCEPTED: "check-circle",
+  PENDING: "clock",
+  CONFIRMED: "check-circle",
+  COMPLETED: "check-circle",
+  CANCELLED: "x-circle",
+};
+
+const STATUS_COLOR = {
+  ACCEPTED: colors.statusSuccess,
+  PENDING: colors.statusPending,
+  CONFIRMED: colors.statusActive,
+  COMPLETED: colors.statusCompleted,
+  CANCELLED: colors.statusCancelled,
+};
 
 export default function MyBookingsScreen({ navigation }) {
   const [bookings, setBookings] = useState([]);
@@ -88,7 +108,7 @@ export default function MyBookingsScreen({ navigation }) {
             #{item._id?.slice(-8).toUpperCase()}
           </AppText>
 
-          <AppText weight="semiBold"
+          <View
             style={[
               styles.statusBadge,
               item.status === "ACCEPTED" && styles.statusAccepted,
@@ -98,14 +118,27 @@ export default function MyBookingsScreen({ navigation }) {
               item.status === "CANCELLED" && styles.statusCancelled,
             ]}
           >
-            {item.status.replace(/_/g, " ")}
-          </AppText>
+            <Feather
+              name={STATUS_ICON[item.status] || "info"}
+              size={11}
+              color={STATUS_COLOR[item.status] || colors.statusNeutral}
+            />
+            <AppText
+              weight="semiBold"
+              style={[
+                styles.statusBadgeText,
+                { color: STATUS_COLOR[item.status] || colors.statusNeutral },
+              ]}
+            >
+              {item.status.replace(/_/g, " ")}
+            </AppText>
+          </View>
         </View>
 
         {/* Route Section */}
         <View style={styles.routeContainer}>
           <View style={styles.locationRow}>
-            <Feather name="map-pin" size={16} color="#6B7280" />
+            <Feather name="map-pin" size={16} color={colors.textMuted} />
             <View style={styles.locationInfo}>
               <AppText weight="semiBold" style={styles.locationLabel}>Pickup</AppText>
               <AppText style={styles.locationText} numberOfLines={1}>
@@ -117,7 +150,7 @@ export default function MyBookingsScreen({ navigation }) {
           <View style={styles.separatorLine} />
 
           <View style={styles.locationRow}>
-            <Feather name="navigation" size={16} color="#6B7280" />
+            <Feather name="navigation" size={16} color={colors.textMuted} />
             <View style={styles.locationInfo}>
               <AppText weight="semiBold" style={styles.locationLabel}>Delivery</AppText>
               <AppText style={styles.locationText} numberOfLines={1}>
@@ -176,7 +209,7 @@ export default function MyBookingsScreen({ navigation }) {
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#F0DBAF" />
+        <ActivityIndicator size="large" color={colors.primary} />
         <AppText weight="semiBold" style={styles.loadingText}>Loading your bookings...</AppText>
       </View>
     );
@@ -189,10 +222,10 @@ export default function MyBookingsScreen({ navigation }) {
           onPress={() => navigation.goBack()}
           style={styles.backButton}
         >
-          <Feather name="arrow-left" size={22} color="#111827" />
+          <Feather name="arrow-left" size={22} color={colors.text} />
         </TouchableOpacity>
 
-        <AppText weight="bold" style={styles.headerTitle}>My Bookings</AppText>
+        <AppText variant="screenTitle" style={styles.headerTitle}>My Bookings</AppText>
 
         <TouchableOpacity
           style={styles.newBookingBtn}
@@ -232,29 +265,20 @@ export default function MyBookingsScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f5f5f5",
-  },
   centerContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#f5f5f5",
+    backgroundColor: colors.background,
   },
   loadingText: {
     marginTop: 12,
     fontSize: 14,
-    color: "#666",
+    color: colors.textMuted,
   },
 
-
-
-
-
-
   statusText: {
-    color: "#fff",
+    color: colors.white,
     fontSize: 12,
     fontWeight: "600",
   },
@@ -310,212 +334,207 @@ const styles = StyleSheet.create({
   },
   emptyIcon: {
     fontSize: 64,
-    marginBottom: 16,
+    marginBottom: spacing.base,
   },
   emptyTitle: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#1f2937",
-    marginBottom: 8,
+    color: colors.text,
+    marginBottom: spacing.sm,
   },
   emptyText: {
     fontSize: 14,
-    color: "#6b7280",
+    color: colors.textMuted,
     textAlign: "center",
-    marginBottom: 24,
+    marginBottom: spacing.xl,
   },
   createBookingBtn: {
-    backgroundColor: "#F0DBAF",
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
+    backgroundColor: colors.primary,
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.md,
+    borderRadius: radius.button,
   },
   createBookingBtnText: {
-    color: "#fff",
+    color: colors.white,
     fontSize: 16,
     fontWeight: "600",
   },
   container: {
     flex: 1,
-    backgroundColor: "#F8FAFC",
+    backgroundColor: colors.background,
   },
 
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 18,
-    backgroundColor: "#FFFFFF",
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.lg,
+    backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
+    borderBottomColor: colors.border,
   },
 
   headerTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#111827",
+    color: colors.text,
   },
 
   newBookingBtn: {
-    backgroundColor: "#F0DBAF",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 10,
+    backgroundColor: colors.primary,
+    paddingHorizontal: spacing.base,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.button,
   },
 
   newBookingBtnText: {
-    color: "#fff",
+    color: colors.white,
     fontSize: 14,
     fontWeight: "600",
   },
 
   bookingCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 18,
-    marginBottom: 18,
-    marginTop: 10,
-    margin: 18,
-    paddingVertical: 18,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.05,
-    shadowRadius: 12,
-    elevation: 4,
+    backgroundColor: colors.surface,
+    borderRadius: radius.card,
+    marginBottom: spacing.base,
+    marginTop: spacing.sm,
+    margin: spacing.base,
+    paddingVertical: spacing.base,
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...shadows.card,
   },
 
   bookingHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 18,
-    marginBottom: 14,
+    paddingHorizontal: spacing.base,
+    marginBottom: spacing.md,
   },
 
   bookingId: {
     fontSize: 13,
     fontWeight: "600",
-    color: "#6B7280",
+    color: colors.textMuted,
   },
 
   statusBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.xs,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
     borderRadius: 20,
+  },
+
+  statusBadgeText: {
     fontSize: 11,
     fontWeight: "600",
   },
 
   statusAccepted: {
     backgroundColor: "#DCFCE7",
-    color: "#166534",
   },
 
   statusPending: {
     backgroundColor: "#FEF3C7",
-    color: "#92400E",
   },
 
   statusConfirmed: {
     backgroundColor: "#DBEAFE",
-    color: "#F0DBAF",
   },
 
   statusCompleted: {
     backgroundColor: "#E0F2FE",
-    color: "#075985",
   },
 
   statusCancelled: {
     backgroundColor: "#FEE2E2",
-    color: "#991B1B",
   },
 
   routeContainer: {
-    paddingHorizontal: 18,
-    marginBottom: 14,
+    paddingHorizontal: spacing.base,
+    marginBottom: spacing.md,
   },
 
   locationRow: {
     flexDirection: "row",
     alignItems: "flex-start",
-    gap: 10,
+    gap: spacing.sm,
   },
 
   separatorLine: {
     height: 1,
-    backgroundColor: "#E5E7EB",
-    marginVertical: 10,
+    backgroundColor: colors.border,
+    marginVertical: spacing.sm,
   },
 
   locationLabel: {
     fontSize: 11,
-    color: "#9CA3AF",
+    color: colors.textMuted,
     marginBottom: 2,
   },
 
   locationText: {
     fontSize: 14,
     fontWeight: "500",
-    color: "#111827",
+    color: colors.text,
   },
 
   detailsRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingHorizontal: 18,
-    paddingTop: 12,
+    paddingHorizontal: spacing.base,
+    paddingTop: spacing.md,
     borderTopWidth: 1,
-    borderTopColor: "#F3F4F6",
+    borderTopColor: colors.border,
   },
 
   detailLabel: {
     fontSize: 11,
-    color: "#9CA3AF",
+    color: colors.textMuted,
   },
 
   detailValue: {
     fontSize: 13,
     fontWeight: "600",
-    color: "#111827",
+    color: colors.text,
   },
 
   actionButtons: {
     flexDirection: "row",
-    gap: 10,
-    paddingHorizontal: 18,
-    paddingTop: 14,
+    gap: spacing.sm,
+    paddingHorizontal: spacing.base,
+    paddingTop: spacing.md,
   },
 
   viewQuotesBtn: {
     flex: 1,
-    backgroundColor: "#F0DBAF",
-    paddingVertical: 12,
-    borderRadius: 12,
+    backgroundColor: colors.primary,
+    paddingVertical: spacing.md,
+    borderRadius: radius.button,
     alignItems: "center",
   },
 
   viewQuotesBtnText: {
-    color: "#fff",
+    color: colors.white,
     fontSize: 13,
     fontWeight: "600",
   },
 
   trackBtn: {
     flex: 1,
-    backgroundColor: "#fff",
-    paddingVertical: 12,
-    borderRadius: 12,
+    backgroundColor: colors.surface,
+    paddingVertical: spacing.md,
+    borderRadius: radius.button,
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#F0DBAF",
+    borderColor: colors.primary,
   },
 
   trackBtnText: {
-    color: "#F0DBAF",
+    color: colors.primary,
     fontSize: 13,
     fontWeight: "600",
   },
 });
-
-

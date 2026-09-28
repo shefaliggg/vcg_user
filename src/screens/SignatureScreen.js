@@ -14,6 +14,9 @@ import { Feather } from "@expo/vector-icons";
 import SignatureCanvas from "react-native-signature-canvas";
 import bookingService from "../services/booking.service";
 import AppText from "../components/AppText";
+import { colors } from "../themes/colors";
+import { spacing } from "../themes/spacing";
+import { radius } from "../themes/radius";
 
 export default function SignatureScreen({ route, navigation }) {
   const { bookingId } = route.params || {};
@@ -60,7 +63,7 @@ export default function SignatureScreen({ route, navigation }) {
 
   return (
     <SafeAreaView style={styles.safeContainer} edges={["top", "bottom"]}>
-      <StatusBar barStyle="light-content" backgroundColor="#F0DBAF" />
+      <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
 
       {/* HEADER */}
       <View style={styles.header}>
@@ -79,7 +82,7 @@ export default function SignatureScreen({ route, navigation }) {
       </View>
 
       <View style={styles.subHeader}>
-        <Feather name="edit-3" size={16} color="#F0DBAF" />
+        <Feather name="edit-3" size={16} color={colors.primary} />
         <AppText style={styles.subText}>
           Please sign below to accept the rate
         </AppText>
@@ -110,7 +113,7 @@ export default function SignatureScreen({ route, navigation }) {
           disabled={loading}
         >
           <Feather name="trash-2" size={18} color="#fff" />
-          <AppText weight="semiBold" style={styles.buttonText}>
+          <AppText variant="button" style={styles.buttonText}>
             Clear
           </AppText>
         </TouchableOpacity>
@@ -128,7 +131,7 @@ export default function SignatureScreen({ route, navigation }) {
           ) : (
             <>
               <Feather name="check-circle" size={18} color="#fff" />
-              <AppText weight="semiBold" style={styles.buttonText}>
+              <AppText variant="button" style={styles.buttonText}>
                 Sign & Submit
               </AppText>
             </>
@@ -146,10 +149,10 @@ const styles = StyleSheet.create({
   },
 
   header: {
-    backgroundColor: "#F0DBAF",
+    backgroundColor: colors.primary,
     paddingTop: Platform.OS === "android" ? 20 : 10,
-    paddingBottom: 20,
-    paddingHorizontal: 20,
+    paddingBottom: spacing.lg,
+    paddingHorizontal: spacing.lg,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -158,7 +161,7 @@ const styles = StyleSheet.create({
   backButton: {
     width: 40,
     height: 40,
-    borderRadius: 12,
+    borderRadius: radius.button,
     backgroundColor: "rgba(255,255,255,0.2)",
     justifyContent: "center",
     alignItems: "center",
@@ -166,39 +169,39 @@ const styles = StyleSheet.create({
 
   headerText: {
     fontSize: 18,
-    color: "#fff",
+    color: colors.white,
   },
 
   subHeader: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 20,
+    paddingHorizontal: spacing.lg,
     paddingVertical: 14,
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
   },
 
   subText: {
     fontSize: 14,
-    color: "#1E293B",
+    color: colors.text,
     marginLeft: 6,
   },
 
   signatureContainer: {
     flex: 1,
-    margin: 20,
-    backgroundColor: "#fff",
-    borderRadius: 18,
+    margin: spacing.lg,
+    backgroundColor: colors.surface,
+    borderRadius: radius.card,
     overflow: "hidden",
     borderWidth: 2,
-    borderColor: "#F0DBAF",
+    borderColor: colors.primary,
   },
 
   buttonContainer: {
     flexDirection: "row",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.base,
     backgroundColor: "#F1F5F9",
-    gap: 12,
+    gap: spacing.md,
   },
 
   clearButton: {
@@ -206,9 +209,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#EF4444",
+    backgroundColor: colors.error,
     paddingVertical: 14,
-    borderRadius: 14,
+    borderRadius: radius.button,
   },
 
   confirmButton: {
@@ -216,15 +219,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#F0DBAF",
+    backgroundColor: colors.primary,
     paddingVertical: 14,
-    borderRadius: 14,
+    borderRadius: radius.button,
   },
 
   buttonText: {
-    color: "#fff",
-    fontSize: 14,
+    color: colors.white,
     marginLeft: 6,
   },
 });
-

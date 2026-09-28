@@ -7,7 +7,8 @@ import { MapView, Marker, Polyline } from "../shims/react-native-maps";
 import polyline from '@mapbox/polyline';
 import { GOOGLE_MAPS_API_KEY } from "../utils/googleMaps";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-const socket = io("http://54.174.219.57:5000");
+import { API_ORIGIN } from "../config/api.config";
+const socket = io(API_ORIGIN);
 import {
   View,
   Text,
@@ -23,6 +24,10 @@ import tripService from "../services/trip.service";
 import ratingService from "../services/rating.service";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AppText from "../components/AppText";
+import { colors } from "../themes/colors";
+import { spacing } from "../themes/spacing";
+import { radius } from "../themes/radius";
+import { shadows } from "../themes/shadows";
 export default function TrackingScreen({ route, navigation }) {
   const { bookingId } = route.params || {};
   const [trip, setTrip] = useState(null);
@@ -189,67 +194,67 @@ export default function TrackingScreen({ route, navigation }) {
         label: "Driver Assigned",
         iconName: "user",
         iconLib: "Feather",
-        color: "#f59e0b",
+        color: colors.statusWarning,
       },
       accepted: {
         label: "Trip Accepted",
         iconName: "check-circle",
         iconLib: "Feather",
-        color: "#22c55e",
+        color: colors.statusSuccess,
       },
       going_to_pickup: {
         label: "Going to Pickup",
         iconName: "truck",
         iconLib: "FontAwesome5",
-        color: "#7ED7C1",
+        color: colors.primary,
       },
       arrived_at_pickup: {
         label: "Arrived at Pickup",
         iconName: "map-pin",
         iconLib: "Feather",
-        color: "#7ED7C1",
+        color: colors.primary,
       },
       loading: {
         label: "Loading",
         iconName: "archive",
         iconLib: "Feather",
-        color: "#7ED7C1",
+        color: colors.primary,
       },
       loaded: {
         label: "Loaded",
         iconName: "check",
         iconLib: "Feather",
-        color: "#22c55e",
+        color: colors.statusSuccess,
       },
       in_transit: {
         label: "In Transit",
         iconName: "navigation",
         iconLib: "Feather",
-        color: "#22c55e",
+        color: colors.statusActive,
       },
       arrived_at_drop: {
         label: "Arrived at Drop",
         iconName: "map-pin",
         iconLib: "Feather",
-        color: "#22c55e",
+        color: colors.statusSuccess,
       },
       delivered: {
         label: "Delivered",
         iconName: "package",
         iconLib: "Feather",
-        color: "#16a34a",
+        color: colors.statusSuccess,
       },
       completed: {
         label: "Completed",
         iconName: "check-circle",
         iconLib: "Feather",
-        color: "#16a34a",
+        color: colors.statusSuccess,
       },
       rejected: {
         label: "Rejected",
         iconName: "x-circle",
         iconLib: "Feather",
-        color: "#dc2626",
+        color: colors.statusError,
       },
     };
 
@@ -258,7 +263,7 @@ export default function TrackingScreen({ route, navigation }) {
         label: status,
         iconName: "circle",
         iconLib: "Feather",
-        color: "#6b7280",
+        color: colors.statusNeutral,
       }
     );
   };
@@ -328,7 +333,7 @@ export default function TrackingScreen({ route, navigation }) {
     console.log('[TrackingScreen] Loading...');
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#7ED7C1" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -364,7 +369,7 @@ export default function TrackingScreen({ route, navigation }) {
   const hasDriver = location && typeof location.lat === 'number' && typeof location.lng === 'number';
 
   // Center map: prefer driver, else pickup, else drop, else default
-  let mapLat = 20.5937, mapLng = 78.9629; // Default: India center
+  let mapLat = 39.8283, mapLng = -98.5795; // Default: US center
   if (hasDriver) { mapLat = location.lat; mapLng = location.lng; }
   else if (hasPickup) { mapLat = pickup.lat; mapLng = pickup.lng; }
   else if (hasDrop) { mapLat = drop.lat; mapLng = drop.lng; }
@@ -421,13 +426,22 @@ export default function TrackingScreen({ route, navigation }) {
             onPress={() => navigation.goBack()}
             style={styles.backButton}
           >
-            <Feather name="arrow-left" size={22} color="#111827" />
+            <Feather name="arrow-left" size={22} color={colors.text} />
           </TouchableOpacity>
 
-          <AppText weight="bold" style={styles.title}>Trip Tracking</AppText>
+          <AppText variant="screenTitle" style={styles.title}>Trip Tracking</AppText>
 
           <View style={styles.statusPill}>
-            <Text style={styles.statusTextModern}>
+            {currentStatus.iconLib === "Feather" && (
+              <Feather name={currentStatus.iconName} size={12} color={currentStatus.color} style={{ marginRight: 4 }} />
+            )}
+            {currentStatus.iconLib === "FontAwesome5" && (
+              <FontAwesome5 name={currentStatus.iconName} size={11} color={currentStatus.color} style={{ marginRight: 4 }} />
+            )}
+            {currentStatus.iconLib === "MaterialIcons" && (
+              <MaterialIcons name={currentStatus.iconName} size={12} color={currentStatus.color} style={{ marginRight: 4 }} />
+            )}
+            <Text style={[styles.statusTextModern, { color: currentStatus.color }]}>
               {currentStatus.label}
             </Text>
           </View>
@@ -439,10 +453,10 @@ export default function TrackingScreen({ route, navigation }) {
             <MapView
               ref={mapRef}
               style={{
-                height: 260,
-                marginHorizontal: 20,
-                marginTop: 20,
-                borderRadius: 18,
+                height: 380,
+                marginHorizontal: spacing.lg,
+                marginTop: spacing.lg,
+                borderRadius: radius.card,
               }}
               initialRegion={{
                 latitude: mapLat,
@@ -460,7 +474,7 @@ export default function TrackingScreen({ route, navigation }) {
                     longitude: location.lng,
                   }}
                   title="Driver"
-                  pinColor="#7ED7C1"
+                  pinColor={colors.primary}
                 />
               )}
               {hasPickup && (
@@ -482,12 +496,12 @@ export default function TrackingScreen({ route, navigation }) {
                 <Polyline
                   coordinates={routeCoords}
                   strokeWidth={4}
-                  strokeColor="#F0DBAF"
+                  strokeColor={colors.primary}
                 />
               )}
             </MapView>
           ) : (
-            <View style={{ height: 260, marginHorizontal: 20, marginTop: 20, borderRadius: 18, alignItems: 'center', justifyContent: 'center', backgroundColor: '#f3f4f6' }}>
+            <View style={{ height: 380, marginHorizontal: spacing.lg, marginTop: spacing.lg, borderRadius: radius.card, alignItems: 'center', justifyContent: 'center', backgroundColor: '#f3f4f6' }}>
               <Text style={{ color: '#888', fontSize: 16, textAlign: 'center' }}>
                 Map is not supported on web.
               </Text>
@@ -497,7 +511,7 @@ export default function TrackingScreen({ route, navigation }) {
 
         {trip.driver && (
           <View style={styles.card}>
-            <AppText weight="bold" style={styles.cardTitle}>Driver Information</AppText>
+            <AppText variant="cardTitle" style={styles.cardTitle}>Driver Information</AppText>
             <View style={styles.driverInfo}>
               <View style={styles.infoRow}>
                 <AppText weight="semiBold" style={styles.infoLabel}>Name:</AppText>
@@ -550,7 +564,7 @@ export default function TrackingScreen({ route, navigation }) {
         )}
 
         <View style={styles.card}>
-          <AppText weight="bold" style={styles.cardTitle}>Trip Timeline</AppText>
+          <AppText variant="cardTitle" style={styles.cardTitle}>Trip Timeline</AppText>
           <View style={styles.timeline}>
             {timeline.map((item, index) => (
               <View key={item.status} style={styles.timelineItem}>
@@ -610,7 +624,7 @@ export default function TrackingScreen({ route, navigation }) {
         {showRatingModal && (
           <View style={styles.modalOverlay}>
             <View style={styles.modalBox}>
-              <Feather name="star" size={32} color="#F0DBAF" style={{ alignSelf: "center" }} />
+              <Feather name="star" size={32} color={colors.primary} style={{ alignSelf: "center" }} />
 
               <AppText weight="bold" style={styles.modalTitle}>
                 Rate Your Driver
@@ -626,7 +640,7 @@ export default function TrackingScreen({ route, navigation }) {
                     <Feather
                       name={star <= rating ? "star" : "star"}
                       size={32}
-                      color={star <= rating ? "#F0DBAF" : "#CBD5E1"}
+                      color={star <= rating ? colors.primary : colors.border}
                       style={{ marginHorizontal: 6 }}
                     />
                   </TouchableOpacity>
@@ -676,22 +690,22 @@ const styles = StyleSheet.create({
 
   modalBox: {
     width: "85%",
-    backgroundColor: "#fff",
-    padding: 24,
-    borderRadius: 20,
-    elevation: 10,
+    backgroundColor: colors.surface,
+    padding: spacing.xl,
+    borderRadius: radius.modal,
+    ...shadows.elevated,
   },
 
   modalTitle: {
     fontSize: 20,
     textAlign: "center",
-    color: "#111827",
+    color: colors.text,
     marginTop: 10,
   },
 
   modalSubtitle: {
     textAlign: "center",
-    color: "#6B7280",
+    color: colors.textMuted,
     marginTop: 4,
     marginBottom: 16,
   },
@@ -704,38 +718,38 @@ const styles = StyleSheet.create({
 
   commentInput: {
     borderWidth: 1,
-    borderColor: "#E5E7EB",
-    padding: 12,
-    borderRadius: 12,
+    borderColor: colors.border,
+    padding: spacing.md,
+    borderRadius: radius.input,
     marginBottom: 16,
-    color: "#111827",
+    color: colors.text,
     minHeight: 60,
   },
 
   submitButton: {
-    backgroundColor: "#F0DBAF",
+    backgroundColor: colors.primary,
     paddingVertical: 14,
-    borderRadius: 14,
+    borderRadius: radius.button,
     alignItems: "center",
   },
   safeArea: {
     flex: 1,
-    backgroundColor: "#F8FAFC",
+    backgroundColor: colors.background,
   },
 
   container: {
     flex: 1,
-    backgroundColor: "#f6f7fb",
+    backgroundColor: colors.background,
   },
 
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingTop: 25,
-    paddingBottom: 25,
-    paddingHorizontal: 20,
-    backgroundColor: "#fff",
+    paddingTop: spacing.base,
+    paddingBottom: spacing.base,
+    paddingHorizontal: spacing.lg,
+    backgroundColor: colors.surface,
   },
 
   backButton: {
@@ -744,14 +758,14 @@ const styles = StyleSheet.create({
 
   title: {
     flex: 1,
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#111827",
+    color: colors.text,
     marginLeft: 10,
   },
 
   statusPill: {
-    backgroundColor: "#e0edff",
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: colors.primaryLight,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
@@ -760,7 +774,6 @@ const styles = StyleSheet.create({
   statusTextModern: {
     fontSize: 12,
     fontWeight: "600",
-    color: "#7ED7C1",
   },
 
   headerCenter: {
@@ -795,22 +808,18 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   card: {
-    backgroundColor: "#fff",
-    marginHorizontal: 20,
-    marginTop: 20,
-    padding: 18,
-    borderRadius: 18,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 4,
+    backgroundColor: colors.surface,
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.lg,
+    padding: spacing.base,
+    borderRadius: radius.card,
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...shadows.card,
   },
   cardTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
     marginBottom: 16,
-    color: "#333",
+    color: colors.text,
   },
   driverInfo: {
     gap: 12,
@@ -821,11 +830,11 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     fontSize: 14,
-    color: '#666',
+    color: colors.textMuted,
   },
   infoValue: {
     fontSize: 14,
-    color: '#333',
+    color: colors.text,
     fontWeight: '600',
   },
   timeline: {
@@ -844,27 +853,27 @@ const styles = StyleSheet.create({
     height: 24,
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: '#ccc',
-    backgroundColor: '#fff',
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
     justifyContent: 'center',
     alignItems: 'center',
   },
   timelineDotCompleted: {
-    backgroundColor: "#F0DBAF",
-    borderColor: "#F0DBAF",
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
 
   timelineDotCurrent: {
-    borderColor: "#F0DBAF",
+    borderColor: colors.primary,
     borderWidth: 3,
   },
 
   timelineLineCompleted: {
-    backgroundColor: "#F0DBAF",
+    backgroundColor: colors.primary,
   },
 
   timelineLabelCurrent: {
-    color: "#F0DBAF",
+    color: colors.primary,
     fontWeight: "700",
   },
   checkmark: {
@@ -894,16 +903,16 @@ const styles = StyleSheet.create({
   },
   timelineLabel: {
     fontSize: 15,
-    color: '#555',
+    color: colors.textMuted,
   },
   timelineLabelCompleted: {
-    color: '#333',
+    color: colors.text,
     fontWeight: '500',
   },
 
   currentBadge: {
     fontSize: 11,
-    color: '#4206a2',
+    color: colors.primary,
     marginTop: 4,
     fontWeight: '600',
   },
@@ -913,31 +922,31 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 12,
-    color: '#666',
+    color: colors.textMuted,
   },
   emptyText: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
+    color: colors.text,
     marginBottom: 8,
     textAlign: 'center',
   },
   emptySubtext: {
     fontSize: 14,
-    color: '#666',
+    color: colors.textMuted,
     textAlign: 'center',
     marginBottom: 20,
   },
   button: {
-    backgroundColor: "#7ED7C1",
+    backgroundColor: colors.primary,
     paddingHorizontal: 30,
-    paddingVertical: 12,
-    borderRadius: 8,
+    paddingVertical: 14,
+    borderRadius: radius.button,
   },
   buttonText: {
     color: "#fff",
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: "600",
   },
  
 

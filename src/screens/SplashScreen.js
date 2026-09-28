@@ -1,12 +1,12 @@
 import React, { useEffect, useRef } from "react";
 import { View, StyleSheet, Animated } from "react-native";
-import { LinearGradient } from 'expo-linear-gradient';
 
 
 
 import AppText from "../components/AppText";
 
 import { Feather } from "@expo/vector-icons";
+import { colors } from "../themes/colors";
 
 export default function SplashScreen() {
   const fadeAnim = useRef(new Animated.Value(1)).current;
@@ -28,9 +28,8 @@ export default function SplashScreen() {
   }, []);
 
   return (
-    <LinearGradient
-      colors={["#F0DBAF", "#7ED7C1"]}
-      style={styles.container}
+    <View
+      style={[styles.container, { backgroundColor: colors.primary }]}
     >
       <Animated.View
         style={[
@@ -44,17 +43,17 @@ export default function SplashScreen() {
         {/* Logo Circle */}
         <View style={styles.logoWrapper}>
           <View style={styles.logoCircle}>
-            <Feather name="truck" size={44} color="#F0DBAF" />
+            <Feather name="truck" size={44} color={colors.primary} />
           </View>
         </View>
 
         {/* Brand */}
         <AppText weight="bold" style={styles.mainText}>
-          VCG
+          CP
         </AppText>
 
         <AppText weight="semiBold" style={styles.subText}>
-          USER
+          SHIPPER
         </AppText>
 
         <AppText style={styles.tagline}>
@@ -68,7 +67,7 @@ export default function SplashScreen() {
         <View style={[styles.dot, styles.dot2]} />
         <View style={[styles.dot, styles.dot3]} />
       </View>
-    </LinearGradient>
+    </View>
   );
 
 }
@@ -118,7 +117,7 @@ const styles = StyleSheet.create({
   },
 
   tagline: {
-    marginTop: 18,
+    marginTop: 16,
     fontSize: 13,
     color: "rgba(255,255,255,0.7)",
     letterSpacing: 0.5,
@@ -128,7 +127,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 60,
     flexDirection: "row",
-    gap: 10,
+    gap: 8,
   },
 
   dot: {

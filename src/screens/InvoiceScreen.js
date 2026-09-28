@@ -17,9 +17,14 @@ import {
 } from "react-native";
 import invoiceService from "../services/invoice.service";
 import Icon from "react-native-vector-icons/MaterialIcons";
+import { Feather } from "@expo/vector-icons";
 import AppText from "../components/AppText";
-import { fonts } from "../themes/typography";
+import { colors } from "../themes/colors";
+import { spacing } from "../themes/spacing";
+import { radius } from "../themes/radius";
+import { shadows } from "../themes/shadows";
 import { useFocusEffect } from "@react-navigation/native";
+import { API_ORIGIN } from "../config/api.config";
 
 
 export default function InvoiceScreen({ navigation }) {
@@ -35,7 +40,7 @@ export default function InvoiceScreen({ navigation }) {
   )
 
   useEffect(() => {
-    socketRef.current = io("http://54.174.219.57:5000");
+    socketRef.current = io(API_ORIGIN);
 
     const initialize = async () => {
       loadInvoices();
@@ -140,13 +145,19 @@ const handlePayment = async (invoiceId, method = "online") => {
               isPaid && styles.paidBadge,
             ]}
           >
+            <Feather
+              name={isPaid ? "check-circle" : isPending ? "clock" : "info"}
+              size={11}
+              color={isPaid ? colors.statusSuccess : isPending ? colors.statusWarning : colors.statusNeutral}
+              style={{ marginRight: 4 }}
+            />
             <AppText weight="semiBold" style={styles.statusText}>
               {item.status.replace(/_/g, " ").toUpperCase()}
             </AppText>
           </View>
         </View>
 
-        <AppText style={styles.amount}>
+        <AppText variant="largePrice" style={styles.amount}>
           ${item.totalAmount}
         </AppText>
 
@@ -190,7 +201,7 @@ const handlePayment = async (invoiceId, method = "online") => {
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#F0DBAF" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -200,7 +211,7 @@ const handlePayment = async (invoiceId, method = "online") => {
       {/* STATUS BAR */}
       <StatusBar
         barStyle="light-content"
-        backgroundColor="#F0DBAF"
+        backgroundColor={colors.primary}
       />
 
       {/* HEADER */}
@@ -212,7 +223,7 @@ const handlePayment = async (invoiceId, method = "online") => {
           <Icon name="arrow-back" size={22} color="#fff" />
         </TouchableOpacity>
 
-        <AppText weight="bold" style={styles.title}>
+        <AppText variant="sectionTitle" style={styles.title}>
           My Invoices
         </AppText>
 
@@ -242,12 +253,12 @@ const handlePayment = async (invoiceId, method = "online") => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F1F5F9",
+    backgroundColor: colors.background,
   },
 
   header: {
-    backgroundColor: "#F0DBAF",
-    paddingTop: 43,
+    backgroundColor: colors.primary,
+    paddingTop: 40,
     paddingBottom: 20,
     paddingHorizontal: 20,
     flexDirection: "row",
@@ -265,9 +276,7 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    fontSize: 20,
     color: "#fff",
-    fontFamily: fonts.semiBold,
   },
 
   listContainer: {
@@ -281,11 +290,13 @@ const styles = StyleSheet.create({
   },
 
   invoiceCard: {
-    backgroundColor: "#fff",
-    borderRadius: 18,
-    padding: 18,
+    backgroundColor: colors.surface,
+    borderRadius: radius.card,
+    padding: spacing.base,
     marginBottom: 16,
-    elevation: 4,
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...shadows.card,
   },
 
   invoiceTop: {
@@ -296,35 +307,35 @@ const styles = StyleSheet.create({
 
   invoiceId: {
     fontWeight: "600",
-    color: "#1E293B",
+    color: colors.text,
   },
 
   amount: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#F0DBAF",
+    color: colors.primary,
     marginTop: 8,
   },
 
   routeBox: {
     marginTop: 14,
-    backgroundColor: "#F8FAFC",
+    backgroundColor: colors.background,
     borderRadius: 12,
     padding: 12,
   },
 
   routeLabel: {
     fontSize: 12,
-    color: "#64748B",
+    color: colors.textMuted,
   },
 
   routeText: {
     fontSize: 14,
-    color: "#1E293B",
+    color: colors.text,
     fontWeight: "500",
   },
 
   statusBadge: {
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 20,
@@ -341,13 +352,13 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: 11,
     fontWeight: "600",
-    color: "#1E293B",
+    color: colors.text,
   },
 
   primaryButton: {
-    backgroundColor: "#F0DBAF",
+    backgroundColor: colors.primary,
     paddingVertical: 14,
-    borderRadius: 14,
+    borderRadius: radius.button,
     alignItems: "center",
   },
 
@@ -358,15 +369,15 @@ const styles = StyleSheet.create({
 
   secondaryButton: {
     borderWidth: 1,
-    borderColor: "#F0DBAF",
+    borderColor: colors.primary,
     paddingVertical: 14,
-    borderRadius: 14,
+    borderRadius: radius.button,
     alignItems: "center",
     marginTop: 10,
   },
 
   secondaryButtonText: {
-    color: "#F0DBAF",
+    color: colors.primary,
     fontWeight: "600",
   },
 
@@ -376,7 +387,7 @@ const styles = StyleSheet.create({
   },
 
   emptyText: {
-    color: "#64748B",
+    color: colors.textMuted,
   },
 });
 

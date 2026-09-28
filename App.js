@@ -14,6 +14,7 @@ import { StatusBar, View } from "react-native";
 import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
 import AppNavigator from "./src/navigation/AppNavigator";
+import ErrorBoundary from "./src/components/ErrorBoundary";
 import { DeviceEventEmitter } from "react-native";
 import { useFonts, Inter_400Regular, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
 import { colors } from "./src/themes/colors";
@@ -61,7 +62,9 @@ export default function App() {
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <StatusBar barStyle="light-content" backgroundColor={colors.gradientStart} />
 
-      <AppNavigator />
+      <ErrorBoundary>
+        <AppNavigator />
+      </ErrorBoundary>
 
     </View>
 

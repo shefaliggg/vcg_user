@@ -1,21 +1,26 @@
 import React from "react";
 import { Text } from "react-native";
-import { fonts } from "../themes/typography";
+import { fonts, textStyles } from "../themes/typography";
+import { colors } from "../themes/colors";
 
-export default function AppText({ style, weight = "regular", ...props }) {
-  const fontFamily =
-    weight === "bold"
+export default function AppText({ style, weight, variant, ...props }) {
+  const variantStyle = variant ? textStyles[variant] : null;
+
+  const fontFamily = weight
+    ? weight === "bold"
       ? fonts.bold
       : weight === "semiBold"
       ? fonts.semiBold
-      : fonts.regular;
+      : fonts.regular
+    : variantStyle?.fontFamily ?? fonts.regular;
 
   return (
     <Text
       style={[
         {
           fontFamily,
-          color: "#111827",
+          fontSize: variantStyle?.fontSize,
+          color: colors.text,
         },
         style,
       ]}

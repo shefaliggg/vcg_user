@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import {
   View,
-  TextInput,
   TouchableOpacity,
   StyleSheet,
   Alert,
@@ -10,27 +9,41 @@ import {
   ScrollView,
   ActivityIndicator,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import authService from "../services/auth.service";
 import AppText from "../components/AppText";
+import FormInput from "../components/FormInput";
 import { colors } from "../themes/colors";
+import { spacing } from "../themes/spacing";
+import { radius } from "../themes/radius";
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const validateEmail = (value) => {
+  if (!value.trim()) return "Required";
+  if (!EMAIL_REGEX.test(value.trim())) return "Enter a valid email address";
+  return null;
+};
 
 export default function ForgotPasswordScreen({ navigation }) {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const [focusedInput, setFocusedInput] = useState(null);
+  const [error, setError] = useState(null);
 
-  const inputBorder = (field) => ({
-    borderColor: focusedInput === field ? colors.primary : colors.border,
-    borderWidth: 1,
-  });
+  const handleEmailChange = (value) => {
+    setEmail(value);
+    if (error && !validateEmail(value)) {
+      setError(null);
+    }
+  };
 
   const handleSubmit = async () => {
-    if (!email.trim()) {
-      Alert.alert("Error", "Please enter your email");
+    const message = validateEmail(email);
+    if (message) {
+      setError(message);
       return;
     }
+    setError(null);
 
     setLoading(true);
     try {
@@ -45,9 +58,8 @@ export default function ForgotPasswordScreen({ navigation }) {
   };
 
   return (
-    <LinearGradient
-      colors={[colors.gradientStart, colors.gradientEnd]}
-      style={{ flex: 1 }}
+    <View
+      style={{ flex: 1, backgroundColor: colors.primary }}
     >
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -65,7 +77,7 @@ export default function ForgotPasswordScreen({ navigation }) {
               <Feather name="lock" size={26} color={colors.primary} />
             </View>
 
-            <AppText weight="bold" style={styles.title}>
+            <AppText variant="screenTitle" style={styles.title}>
               Forgot Password
             </AppText>
 
@@ -77,24 +89,16 @@ export default function ForgotPasswordScreen({ navigation }) {
           {/* Card */}
           <View style={styles.card}>
 
-            <View style={styles.inputContainer}>
-              <AppText weight="semiBold" style={styles.label}>
-                Email
-              </AppText>
-
-              <TextInput
-                style={[styles.input, inputBorder("email")]}
-                placeholder="Enter your email"
-                placeholderTextColor="#94A3B8"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                editable={!loading}
-                value={email}
-                onChangeText={setEmail}
-                onFocus={() => setFocusedInput("email")}
-                onBlur={() => setFocusedInput(null)}
-              />
-            </View>
+            <FormInput
+              label="Email"
+              placeholder="Enter your email"
+              keyboardType="email-address"
+              autoCapitalize="none"
+              editable={!loading}
+              value={email}
+              onChangeText={handleEmailChange}
+              error={error}
+            />
 
             <TouchableOpacity
               style={styles.button}
@@ -102,9 +106,9 @@ export default function ForgotPasswordScreen({ navigation }) {
               disabled={loading}
             >
               {loading ? (
-                <ActivityIndicator color="#fff" />
+                <ActivityIndicator color={colors.white} />
               ) : (
-                <AppText weight="bold" style={styles.buttonText}>
+                <AppText variant="button" style={styles.buttonText}>
                   Send OTP
                 </AppText>
               )}
@@ -122,64 +126,62 @@ export default function ForgotPasswordScreen({ navigation }) {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </LinearGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   header: {
-    marginTop: 120,
+    marginTop: spacing.huge,
     alignItems: "center",
   },
   iconContainer: {
-    backgroundColor: "#fff",
-    padding: 16,
+    backgroundColor: colors.surface,
+    padding: spacing.base,
     borderRadius: 50,
-    marginBottom: 16,
+    marginBottom: spacing.base,
   },
   title: {
-    fontSize: 24,
-    color: "#fff",
+    color: colors.white,
   },
   subtitle: {
     color: "rgba(255,255,255,0.8)",
-    marginTop: 6,
+    marginTop: spacing.xs,
     textAlign: "center",
-    paddingHorizontal: 30,
+    paddingHorizontal: spacing.xxl,
   },
   card: {
-    backgroundColor: "#fff",
-    marginTop: 40,
-    borderTopLeftRadius: 32,
-    borderTopRightRadius: 32,
-    padding: 24,
+    backgroundColor: colors.surface,
+    marginTop: spacing.xxxl,
+    borderTopLeftRadius: radius.bottomSheet,
+    borderTopRightRadius: radius.bottomSheet,
+    padding: spacing.xl,
     flex: 1,
   },
   inputContainer: {
-    marginBottom: 20,
+    marginBottom: spacing.lg,
   },
   label: {
-    marginBottom: 8,
-    color: "#1E293B",
+    marginBottom: spacing.sm,
+    color: colors.text,
   },
   input: {
-    backgroundColor: "#F8FAFC",
-    borderRadius: 14,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    backgroundColor: colors.background,
+    borderRadius: radius.input,
+    paddingHorizontal: spacing.base,
+    paddingVertical: spacing.base,
     fontSize: 15,
-    color: "#1E293B",
+    color: colors.text,
   },
   button: {
     backgroundColor: colors.primary,
-    borderRadius: 16,
-    paddingVertical: 18,
+    borderRadius: radius.button,
+    paddingVertical: spacing.base,
     alignItems: "center",
-    marginTop: 10,
+    marginTop: spacing.md,
   },
   buttonText: {
-    color: "#fff",
-    fontSize: 16,
+    color: colors.white,
   },
   backLink: {
     textAlign: "center",

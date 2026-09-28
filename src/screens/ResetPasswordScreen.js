@@ -9,10 +9,13 @@ import {
   Platform,
   ScrollView,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import AppText from "../components/AppText";
+import FormInput from "../components/FormInput";
 import authService from "../services/auth.service";
+import { colors } from "../themes/colors";
+import { spacing } from "../themes/spacing";
+import { radius } from "../themes/radius";
 
 export default function ResetPasswordScreen({ route, navigation }) {
   const { email } = route.params;
@@ -21,7 +24,22 @@ export default function ResetPasswordScreen({ route, navigation }) {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [focusedIndex, setFocusedIndex] = useState(null);
+  const [otpError, setOtpError] = useState(null);
+  const [errors, setErrors] = useState({});
   const inputs = useRef([]);
+
+  const validators = {
+    password: (v) => {
+      if (!v) return "Required";
+      if (v.length < 6) return "Must be at least 6 characters";
+      return null;
+    },
+    confirmPassword: (v, pass) => {
+      if (!v) return "Required";
+      if (v !== pass) return "Passwords do not match";
+      return null;
+    },
+  };
 
   const handleOtpChange = (value, index) => {
     if (!/^[0-9]?$/.test(value)) return;
@@ -29,22 +47,53 @@ export default function ResetPasswordScreen({ route, navigation }) {
     const newOtp = [...otp];
     newOtp[index] = value;
     setOtp(newOtp);
+    setOtpError(null);
 
     if (value && index < 5) {
       inputs.current[index + 1].focus();
     }
   };
 
+  const handlePasswordChange = (value) => {
+    setPassword(value);
+    if (errors.password && !validators.password(value)) {
+      setErrors((prev) => ({ ...prev, password: undefined }));
+    }
+    if (errors.confirmPassword && !validators.confirmPassword(confirmPassword, value)) {
+      setErrors((prev) => ({ ...prev, confirmPassword: undefined }));
+    }
+  };
+
+  const handleConfirmPasswordChange = (value) => {
+    setConfirmPassword(value);
+    if (errors.confirmPassword && !validators.confirmPassword(value, password)) {
+      setErrors((prev) => ({ ...prev, confirmPassword: undefined }));
+    }
+  };
+
   const handleSubmit = async () => {
     const fullOtp = otp.join("");
 
-    if (fullOtp.length !== 6) {
-      Alert.alert("Error", "Enter complete OTP");
-      return;
+    const nextErrors = {
+      password: validators.password(password),
+      confirmPassword: validators.confirmPassword(confirmPassword, password),
+    };
+    const hasFieldErrors = nextErrors.password || nextErrors.confirmPassword;
+    const otpIncomplete = fullOtp.length !== 6;
+
+    if (otpIncomplete) {
+      setOtpError("Enter the complete 6-digit code");
+    } else {
+      setOtpError(null);
     }
 
-    if (password !== confirmPassword) {
-      Alert.alert("Error", "Passwords do not match");
+    if (hasFieldErrors) {
+      setErrors(nextErrors);
+    } else {
+      setErrors({});
+    }
+
+    if (otpIncomplete || hasFieldErrors) {
       return;
     }
 
@@ -64,9 +113,8 @@ export default function ResetPasswordScreen({ route, navigation }) {
   };
 
   return (
-    <LinearGradient
-      colors={["#F0DBAF", "#7ED7C1"]}
-      style={{ flex: 1 }}
+    <View
+      style={{ flex: 1, backgroundColor: colors.primary }}
     >
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -80,10 +128,10 @@ export default function ResetPasswordScreen({ route, navigation }) {
           {/* Header */}
           <View style={styles.header}>
             <View style={styles.iconContainer}>
-              <Feather name="shield" size={26} color="#F0DBAF" />
+              <Feather name="shield" size={26} color={colors.primary} />
             </View>
 
-            <AppText weight="bold" style={styles.title}>
+            <AppText variant="screenTitle" style={styles.title}>
               Verify OTP
             </AppText>
 
@@ -96,7 +144,7 @@ export default function ResetPasswordScreen({ route, navigation }) {
           <View style={styles.card}>
 
             {/* OTP BOXES */}
-            <View style={styles.otpRow}>
+            <View style={[styles.otpRow, otpError && { marginBottom: spacing.sm }]}>
               {otp.map((digit, index) => (
                 <TextInput
                   key={index}
@@ -104,6 +152,7 @@ export default function ResetPasswordScreen({ route, navigation }) {
                   style={[
                     styles.otpBox,
                     focusedIndex === index && styles.otpFocused,
+                    otpError && styles.otpBoxError,
                   ]}
                   keyboardType="number-pad"
                   maxLength={1}
@@ -116,29 +165,30 @@ export default function ResetPasswordScreen({ route, navigation }) {
                 />
               ))}
             </View>
+            {otpError && <AppText style={styles.otpErrorText}>{otpError}</AppText>}
 
             {/* New Password */}
-            <TextInput
-              style={styles.input}
+            <FormInput
               placeholder="New password"
               secureTextEntry
               value={password}
-              onChangeText={setPassword}
+              onChangeText={handlePasswordChange}
+              error={errors.password}
             />
 
-            <TextInput
-              style={styles.input}
+            <FormInput
               placeholder="Confirm password"
               secureTextEntry
               value={confirmPassword}
-              onChangeText={setConfirmPassword}
+              onChangeText={handleConfirmPasswordChange}
+              error={errors.confirmPassword}
             />
 
             <TouchableOpacity
               style={styles.button}
               onPress={handleSubmit}
             >
-              <AppText weight="bold" style={styles.buttonText}>
+              <AppText variant="button" style={styles.buttonText}>
                 Reset Password
               </AppText>
             </TouchableOpacity>
@@ -146,71 +196,72 @@ export default function ResetPasswordScreen({ route, navigation }) {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </LinearGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   header: {
-    marginTop: 120,
+    marginTop: spacing.huge,
     alignItems: "center",
   },
   iconContainer: {
-    backgroundColor: "#fff",
-    padding: 16,
+    backgroundColor: colors.surface,
+    padding: spacing.base,
     borderRadius: 50,
-    marginBottom: 16,
+    marginBottom: spacing.base,
   },
   title: {
-    fontSize: 24,
-    color: "#fff",
+    color: colors.white,
   },
   subtitle: {
     color: "rgba(255,255,255,0.8)",
     textAlign: "center",
-    paddingHorizontal: 30,
+    paddingHorizontal: spacing.xxl,
   },
   card: {
-    backgroundColor: "#fff",
-    marginTop: 40,
-    borderTopLeftRadius: 32,
-    borderTopRightRadius: 32,
-    padding: 24,
+    backgroundColor: colors.surface,
+    marginTop: spacing.xxxl,
+    borderTopLeftRadius: radius.bottomSheet,
+    borderTopRightRadius: radius.bottomSheet,
+    padding: spacing.xl,
     flex: 1,
   },
   otpRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 30,
+    marginBottom: spacing.xxl,
   },
   otpBox: {
     width: 45,
     height: 55,
-    borderRadius: 12,
+    borderRadius: radius.input,
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: colors.border,
     textAlign: "center",
     fontSize: 20,
-    backgroundColor: "#F8FAFC",
+    backgroundColor: colors.background,
   },
   otpFocused: {
-    borderColor: "#F0DBAF",
+    borderColor: colors.primary,
   },
-  input: {
-    backgroundColor: "#F8FAFC",
-    borderRadius: 14,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    marginBottom: 16,
+  otpBoxError: {
+    borderColor: colors.error,
+  },
+  otpErrorText: {
+    color: colors.error,
+    fontSize: 12,
+    marginBottom: spacing.lg,
+    textAlign: "center",
   },
   button: {
-    backgroundColor: "#F0DBAF",
-    borderRadius: 16,
-    paddingVertical: 18,
+    backgroundColor: colors.primary,
+    borderRadius: radius.button,
+    paddingVertical: spacing.base,
     alignItems: "center",
   },
   buttonText: {
-    color: "#fff",
+    color: colors.white,
   },
 });
 

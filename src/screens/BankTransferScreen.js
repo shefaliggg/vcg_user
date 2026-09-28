@@ -9,11 +9,12 @@ import {
   StatusBar,
 } from "react-native";
 import * as Clipboard from "expo-clipboard";
-import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import AppText from "../components/AppText";
 import invoiceService from "../services/invoice.service";
 import { colors } from "../themes/colors";
+import { spacing } from "../themes/spacing";
+import { radius } from "../themes/radius";
 
 export default function BankTransferScreen({ route, navigation }) {
   const { invoiceId, bankDetails } = route.params || {};
@@ -44,8 +45,8 @@ export default function BankTransferScreen({ route, navigation }) {
 };
 
   return (
-    <LinearGradient colors={[colors.gradientStart, colors.gradientEnd]} style={{ flex: 1 }}>
-      <StatusBar barStyle="light-content" backgroundColor={colors.gradientStart} />
+    <View style={{ flex: 1, backgroundColor: colors.primary }}>
+      <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
 
       {/* HEADER */}
       <View style={styles.header}>
@@ -56,7 +57,7 @@ export default function BankTransferScreen({ route, navigation }) {
           <Feather name="arrow-left" size={22} color="#fff" />
         </TouchableOpacity>
 
-        <AppText weight="bold" style={styles.headerTitle}>
+        <AppText variant="sectionTitle" style={styles.headerTitle}>
           Bank Transfer
         </AppText>
 
@@ -67,7 +68,7 @@ export default function BankTransferScreen({ route, navigation }) {
       <View style={styles.card}>
         <ScrollView showsVerticalScrollIndicator={false}>
 
-          <AppText weight="bold" style={styles.sectionTitle}>
+          <AppText variant="sectionTitle" style={styles.sectionTitle}>
             Transfer Details
           </AppText>
 
@@ -108,7 +109,7 @@ export default function BankTransferScreen({ route, navigation }) {
 
           <View style={[styles.row, { marginTop: 10 }]}>
             <AppText style={styles.label}>Amount</AppText>
-            <AppText weight="bold" style={styles.amount}>
+            <AppText variant="largePrice" style={styles.amount}>
               ${bankDetails?.amount}
             </AppText>
           </View>
@@ -156,7 +157,7 @@ export default function BankTransferScreen({ route, navigation }) {
 
         </ScrollView>
       </View>
-    </LinearGradient>
+    </View>
   );
 }
 
@@ -181,22 +182,20 @@ const styles = StyleSheet.create({
 
   headerTitle: {
     color: "#fff",
-    fontSize: 18,
   },
 
   card: {
     flex: 1,
-    backgroundColor: "#fff",
-    borderTopLeftRadius: 32,
-    borderTopRightRadius: 32,
-    paddingHorizontal: 24,
-    paddingTop: 24,
+    backgroundColor: colors.surface,
+    borderTopLeftRadius: radius.bottomSheet,
+    borderTopRightRadius: radius.bottomSheet,
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing.xl,
   },
 
   sectionTitle: {
-    fontSize: 18,
     marginBottom: 20,
-    color: "#1E293B",
+    color: colors.text,
   },
 
   row: {
@@ -205,12 +204,11 @@ const styles = StyleSheet.create({
 
   label: {
     fontSize: 12,
-    color: "#64748B",
+    color: colors.textMuted,
     marginBottom: 4,
   },
 
   amount: {
-    fontSize: 18,
     color: colors.primary,
   },
 
@@ -219,8 +217,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: colors.primary,
-    paddingVertical: 16,
-    borderRadius: 16,
+    height: 50,
+    borderRadius: radius.button,
     marginTop: 20,
     gap: 8,
   },
@@ -233,9 +231,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#16A34A",
-    paddingVertical: 16,
-    borderRadius: 16,
+    backgroundColor: colors.success,
+    height: 50,
+    borderRadius: radius.button,
     marginTop: 16,
     gap: 8,
   },
@@ -247,7 +245,7 @@ const styles = StyleSheet.create({
   notice: {
     marginTop: 18,
     fontSize: 12,
-    color: "#64748B",
+    color: colors.textMuted,
     textAlign: "center",
   },
 });

@@ -10,9 +10,11 @@ import {
   ScrollView,
 } from "react-native";
 import ratingService from "../services/rating.service";
-import { LinearGradient } from "expo-linear-gradient";
 import AppText from "../components/AppText";
 import { Feather } from "@expo/vector-icons";
+import { colors } from "../themes/colors";
+import { spacing } from "../themes/spacing";
+import { radius } from "../themes/radius";
 
 export default function RatingScreen({ route, navigation }) {
   const { tripId, driverId } = route.params || {};
@@ -54,9 +56,8 @@ export default function RatingScreen({ route, navigation }) {
 
 
   return (
-    <LinearGradient
-      colors={["#F0DBAF", "#7ED7C1"]}
-      style={{ flex: 1 }}
+    <View
+      style={{ flex: 1, backgroundColor: colors.primary }}
     >
       {/* Header */}
       <View style={styles.header}>
@@ -68,7 +69,7 @@ export default function RatingScreen({ route, navigation }) {
           <Feather name="arrow-left" size={22} color="#fff" />
         </TouchableOpacity>
 
-        <AppText weight="bold" style={styles.headerTitle}>
+        <AppText variant="sectionTitle" style={styles.headerTitle}>
           Sign Confirmation
         </AppText>
 
@@ -78,7 +79,7 @@ export default function RatingScreen({ route, navigation }) {
       {/* White Card */}
       <View style={styles.card}>
 
-        <AppText weight="bold" style={styles.title}>
+        <AppText variant="sectionTitle" style={styles.title}>
           Rate Confirmation
         </AppText>
 
@@ -139,7 +140,7 @@ export default function RatingScreen({ route, navigation }) {
         </TouchableOpacity>
 
       </View>
-    </LinearGradient>
+    </View>
   );
 }
 
@@ -161,35 +162,33 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     color: "#fff",
-    fontSize: 18,
   },
 
   card: {
     flex: 1,
     marginTop: 40,
-    backgroundColor: "#fff",
-    borderTopLeftRadius: 32,
-    borderTopRightRadius: 32,
-    padding: 24,
+    backgroundColor: colors.surface,
+    borderTopLeftRadius: radius.bottomSheet,
+    borderTopRightRadius: radius.bottomSheet,
+    padding: spacing.xl,
   },
 
   title: {
-    fontSize: 18,
-    color: "#1E293B",
+    color: colors.text,
     marginBottom: 6,
   },
   subtitle: {
-    color: "#64748B",
+    color: colors.textMuted,
     marginBottom: 20,
   },
 
   signatureContainer: {
     flex: 1,
-    borderRadius: 16,
+    borderRadius: radius.card,
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: "#E2E8F0",
-    backgroundColor: "#F8FAFC",
+    borderColor: colors.border,
+    backgroundColor: colors.background,
   },
 
   buttonRow: {
@@ -201,20 +200,20 @@ const styles = StyleSheet.create({
   clearButton: {
     flex: 1,
     paddingVertical: 16,
-    borderRadius: 14,
+    borderRadius: radius.button,
     borderWidth: 1,
-    borderColor: "#EF4444",
+    borderColor: colors.error,
     alignItems: "center",
   },
   clearText: {
-    color: "#EF4444",
+    color: colors.error,
   },
 
   confirmButton: {
     flex: 1,
-    backgroundColor: "#F0DBAF",
+    backgroundColor: colors.primary,
     paddingVertical: 16,
-    borderRadius: 14,
+    borderRadius: radius.button,
     alignItems: "center",
   },
   confirmText: {
@@ -226,7 +225,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   cancelText: {
-    color: "#64748B",
+    color: colors.textMuted,
   },
 
   disabled: {

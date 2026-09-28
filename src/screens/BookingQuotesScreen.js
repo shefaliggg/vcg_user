@@ -15,11 +15,18 @@ import bookingService from "../services/booking.service";
 import AppText from "../components/AppText";
 import { useFocusEffect } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
+import { API_ORIGIN } from "../config/api.config";
+import { colors } from "../themes/colors";
+import { spacing } from "../themes/spacing";
+import { radius } from "../themes/radius";
+import { shadows } from "../themes/shadows";
 
-
-
-
-const API_BASE_URL = "http://54.174.219.57:5000";
+const RATE_STATUS_META = {
+  not_generated: { icon: "clock", color: colors.statusPending },
+  awaiting_user_signature: { icon: "edit-3", color: colors.statusWarning },
+  user_signed: { icon: "check-circle", color: colors.statusPending },
+  driver_accepted: { icon: "check-circle", color: colors.statusSuccess },
+};
 
 export default function BookingQuotesScreen({ route, navigation }) {
   const { bookingId } = route.params || {};
@@ -93,7 +100,7 @@ const selectedDriverName =
   const renderQuoteItem = ({ item, index }) => (
     <View style={styles.quoteCard}>
       <View style={styles.quoteHeader}>
-        <AppText weight="semiBold" style={styles.quoteTitle}>Quote #{index + 1}</AppText>
+        <AppText variant="cardTitle" style={styles.quoteTitle}>Quote #{index + 1}</AppText>
         <AppText weight="semiBold" style={styles.quotedBy}>
           By: {
             item.driverId?.userId?.firstName
@@ -103,7 +110,7 @@ const selectedDriverName =
         </AppText>
       </View>
       <View style={styles.quoteDetails}>
-        <AppText weight="semiBold" style={styles.amount}>$ {item.price != null ? item.price : 0}</AppText>
+        <AppText variant="largePrice" style={styles.amount}>$ {item.price != null ? item.price : 0}</AppText>
         {item.notes && <AppText style={styles.notes}>{item.notes}</AppText>}
         <AppText style={styles.createdAt}>
           {item.createdAt ? new Date(item.createdAt).toLocaleDateString() : 'N/A'}
@@ -122,7 +129,7 @@ const selectedDriverName =
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#7ED7C1" />
+        <ActivityIndicator size="large" color={colors.primary} />
         <AppText weight="semiBold" style={styles.loadingText}>Loading booking...</AppText>
       </View>
     );
@@ -145,13 +152,18 @@ const selectedDriverName =
 
   const quotes = booking.quotations || [];
   const rateConfirmationStatus = booking.rateConfirmation?.status || "not_generated";
+  const rateStatusMeta =
+    RATE_STATUS_META[rateConfirmationStatus] || {
+      icon: "info",
+      color: colors.statusNeutral,
+    };
 
   return (
     <View style={styles.container}>
       {/* Booking Header */}
       <View style={styles.bookingHeader}>
 
-       
+
      <View style={styles.headerRow}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerBack}>
             <Feather name="arrow-left" size={22} color="#fff" />
@@ -167,6 +179,7 @@ const selectedDriverName =
             {booking.pickupLocation?.address?.slice(0, 30)}...{'\n'}→ {booking.deliveryLocation?.address?.slice(0, 30)}...
           </AppText>
           <View style={styles.statusBadge}>
+            <Feather name={rateStatusMeta.icon} size={12} color="#fff" />
             <AppText weight="semiBold" style={styles.statusText}>
               {rateConfirmationStatus.toUpperCase().replace(/_/g, " ")}
             </AppText>
@@ -178,7 +191,7 @@ const selectedDriverName =
       {(booking.selectedQuote || (booking.rateConfirmation && booking.rateConfirmation.pdfUrl)) && (
         <View style={styles.selectedQuoteContainer}>
           <AppText weight="semiBold" style={styles.selectedQuoteTitle}>Selected Quote</AppText>
-          <AppText weight="bold" style={styles.selectedAmount}>
+          <AppText variant="largePrice" style={styles.selectedAmount}>
             ${selectedPrice}
           </AppText>
           <AppText weight="semiBold" style={styles.statusInfo}>
@@ -194,7 +207,7 @@ const selectedDriverName =
               <TouchableOpacity
                 style={styles.viewPdfButton}
                 onPress={() => {
-                  const fullUrl = `${API_BASE_URL}${booking.rateConfirmation.pdfUrl}`;
+                  const fullUrl = `${API_ORIGIN}${booking.rateConfirmation.pdfUrl}`;
                   Linking.openURL(fullUrl).catch(err => {
                     Alert.alert("Error", "Cannot open PDF: " + err.message);
                   });
@@ -213,17 +226,20 @@ const selectedDriverName =
             )}
             {rateConfirmationStatus === "not_generated" && (
               <View style={styles.waitingBox}>
-                <AppText weight="semiBold" style={styles.waitingText}>⏳ PDF will be generated after selection</AppText>
+                <Feather name="clock" size={14} color={colors.statusWarning} />
+                <AppText weight="semiBold" style={styles.waitingText}>PDF will be generated after selection</AppText>
               </View>
             )}
             {rateConfirmationStatus === "user_signed" && (
               <View style={styles.waitingBox}>
-                <AppText weight="semiBold" style={styles.waitingText}>✓ Signed - Waiting for driver acceptance</AppText>
+                <Feather name="check-circle" size={14} color={colors.statusWarning} />
+                <AppText weight="semiBold" style={styles.waitingText}>Signed - Waiting for driver acceptance</AppText>
               </View>
             )}
             {rateConfirmationStatus === "driver_accepted" && (
               <View style={styles.completedBox}>
-                <AppText weight="semiBold" style={styles.completedText}>✓ Completed - Ready for pickup</AppText>
+                <Feather name="check-circle" size={14} color={colors.statusSuccess} />
+                <AppText weight="semiBold" style={styles.completedText}>Completed - Ready for pickup</AppText>
               </View>
             )}
           </View>
@@ -248,7 +264,7 @@ const selectedDriverName =
         </View>
       )}
 
-     
+
     </View>
   );
 }
@@ -258,7 +274,7 @@ const styles = StyleSheet.create({
   headerRow: {
   flexDirection: "row",
   alignItems: "center",
-  marginBottom: 10,
+  marginBottom: spacing.sm,
 },
 
 headerBack: {
@@ -271,54 +287,57 @@ headerBack: {
 },
   container: {
     flex: 1,
-    backgroundColor: "#F6F7FB",
+    backgroundColor: colors.background,
   },
   centerContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#f5f5f5",
+    backgroundColor: colors.background,
   },
   loadingText: {
     marginTop: 10,
     fontSize: 16,
-    color: "#666",
+    color: colors.textMuted,
   },
   errorText: {
     fontSize: 16,
-    color: "#d32f2f",
-    marginBottom: 20,
+    color: colors.error,
+    marginBottom: spacing.lg,
   },
   bookingHeader: {
-    backgroundColor: "#F0DBAF",
+    backgroundColor: colors.primary,
     paddingTop: 55,
-    paddingBottom: 25,
-    paddingHorizontal: 20,
+    paddingBottom: spacing.xl,
+    paddingHorizontal: spacing.lg,
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
   },
   bookingTitle: {
     fontSize: 20,
     fontWeight: "600",
-    color: "#fff",
-    marginBottom: 6,
+    color: colors.white,
+    marginBottom: spacing.sm,
   },
 
   bookingId: {
     fontSize: 12,
     color: "rgba(255,255,255,0.8)",
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
 
   bookingRoute: {
     fontSize: 13,
     color: "rgba(255,255,255,0.85)",
-    marginBottom: 12,
+    marginBottom: spacing.md,
   },
   statusBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.xs,
     backgroundColor: "rgba(255,255,255,0.15)",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
     borderRadius: 20,
     alignSelf: "flex-start",
   },
@@ -326,19 +345,17 @@ headerBack: {
   statusText: {
     fontSize: 12,
     fontWeight: "600",
-    color: "#fff",
+    color: colors.white,
   },
   selectedQuoteContainer: {
-    backgroundColor: "#fff",
-    marginHorizontal: 16,
-    marginTop: 20,
-    padding: 20,
-    borderRadius: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 3,
+    backgroundColor: colors.surface,
+    marginHorizontal: spacing.base,
+    marginTop: spacing.lg,
+    padding: spacing.base,
+    borderRadius: radius.card,
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...shadows.card,
   },
   selectedQuoteTitle: {
     fontSize: 13,
@@ -347,130 +364,123 @@ headerBack: {
   },
   statusInfo: {
     fontSize: 13,
-    color: "#666",
+    color: colors.textMuted,
     marginTop: 5,
     fontWeight: "500",
   },
   pdfButtonsRow: {
-    marginTop: 15,
-    gap: 10,
+    marginTop: spacing.base,
+    gap: spacing.sm,
   },
 
   viewPdfButton: {
-    backgroundColor: "#F0DBAF",
-    borderRadius: 14,
+    backgroundColor: colors.primary,
+    borderRadius: radius.button,
     paddingVertical: 14,
     alignItems: "center",
-    color: "#fff",
   },
   signButton: {
-    backgroundColor: "#4caf50",
-    borderRadius: 8,
+    backgroundColor: colors.success,
+    borderRadius: radius.button,
     paddingVertical: 14,
     paddingHorizontal: 15,
     alignItems: "center",
-    elevation: 3,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    ...shadows.card,
   },
   signButtonText: {
-    color: "#fff",
+    color: colors.white,
     fontSize: 16,
     fontWeight: "700",
   },
   waitingBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: spacing.xs,
     backgroundColor: "#fff3cd",
     borderRadius: 8,
     paddingVertical: 12,
     paddingHorizontal: 15,
-    alignItems: "center",
     borderWidth: 1,
-    borderColor: "#ffc107",
+    borderColor: colors.warning,
   },
   waitingText: {
-    color: "#856404",
+    color: colors.statusWarning,
     fontSize: 14,
     fontWeight: "600",
   },
   completedBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: spacing.xs,
     backgroundColor: "#d4edda",
     borderRadius: 8,
     paddingVertical: 12,
     paddingHorizontal: 15,
-    alignItems: "center",
     borderWidth: 1,
-    borderColor: "#4caf50",
+    borderColor: colors.success,
   },
   completedText: {
-    color: "#155724",
+    color: colors.statusSuccess,
     fontSize: 14,
     fontWeight: "600",
   },
   selectedAmount: {
-    fontSize: 28,
-    fontWeight: "700",
-    color: "#F0DBAF",
+    color: colors.primary,
     marginVertical: 6,
   },
   pdfUrl: {
     fontSize: 11,
-    color: "#666",
+    color: colors.textMuted,
     marginTop: 5,
   },
   listContainer: {
-    padding: 15,
+    padding: spacing.base,
     paddingBottom: 120,
   },
-  
+
   quoteCard: {
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: 18,
-    marginBottom: 14,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    elevation: 2,
+    backgroundColor: colors.surface,
+    borderRadius: radius.card,
+    padding: spacing.base,
+    marginBottom: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...shadows.card,
   },
   quoteHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 10,
+    marginBottom: spacing.sm,
   },
   quoteTitle: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#333",
+    color: colors.text,
   },
   quotedBy: {
     fontSize: 12,
-    color: "#999",
+    color: colors.textMuted,
   },
   quoteDetails: {
-    marginBottom: 12,
+    marginBottom: spacing.md,
   },
   amount: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#F0DBAF",
-    marginBottom: 6,
+    color: colors.primary,
+    marginBottom: spacing.sm,
   },
   notes: {
     fontSize: 13,
-    color: "#666",
+    color: colors.textMuted,
     marginBottom: 5,
   },
   createdAt: {
     fontSize: 11,
-    color: "#999",
+    color: colors.textMuted,
   },
   selectButton: {
-    backgroundColor: "#F0DBAF",
-    borderRadius: 12,
+    backgroundColor: colors.primary,
+    borderRadius: radius.button,
     paddingVertical: 12,
     alignItems: "center",
   },
@@ -478,12 +488,12 @@ headerBack: {
     backgroundColor: "#ccc",
   },
   selectButtonText: {
-    color: "#fff",
+    color: colors.white,
     fontSize: 14,
     fontWeight: "600",
   },
   viewPdfButtonText: {
-    color: "#fff",
+    color: colors.white,
     fontSize: 14,
     fontWeight: "600",
   },
@@ -491,12 +501,12 @@ headerBack: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 20,
+    paddingHorizontal: spacing.lg,
   },
   emptyText: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#999",
+    color: colors.textMuted,
     marginBottom: 5,
   },
   emptySubText: {
@@ -509,34 +519,33 @@ headerBack: {
     bottom: height*0.03,
     left: 20,
     right: 20,
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     borderRadius: 8,
     paddingVertical: 12,
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#ddd",
-    
+    borderColor: colors.border,
+
   },
   closeButtonText: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#666",
+    color: colors.textMuted,
   },
   backButton: {
-    backgroundColor: "#7ED7C1",
+    backgroundColor: colors.primary,
     borderRadius: 8,
     paddingHorizontal: 20,
     paddingVertical: 10,
   },
   backButtonText: {
-    color: "#fff",
+    color: colors.white,
     fontSize: 14,
     fontWeight: "600",
   },
   selectedQuoteTitle: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#6B7280",
+    color: colors.textMuted,
   },
 });
-

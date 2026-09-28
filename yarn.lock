@@ -1699,6 +1699,13 @@
   dependencies:
     merge-options "^3.0.4"
 
+"@react-native-community/datetimepicker@8.6.0":
+  version "8.6.0"
+  resolved "https://registry.yarnpkg.com/@react-native-community/datetimepicker/-/datetimepicker-8.6.0.tgz#1c4318a8bc1d5bfd111d782a87cf0b729f718e79"
+  integrity sha512-yxPSqNfxgpGaqHQIpatqe6ykeBdU/1pdsk/G3x01mY2bpTflLpmVTLqFSJYd3MiZzxNZcMs/j1dQakUczSjcYA==
+  dependencies:
+    invariant "^2.2.4"
+
 "@react-native-community/viewpager@^5.0.11":
   version "5.0.11"
   resolved "https://registry.yarnpkg.com/@react-native-community/viewpager/-/viewpager-5.0.11.tgz#dbeb2d1b2452607926407c99e4de59c7db9e3019"
@@ -3850,6 +3857,11 @@ expo-dev-menu@7.0.18:
   dependencies:
     expo-dev-menu-interface "2.0.0"
 
+expo-document-picker@~55.0.16:
+  version "55.0.16"
+  resolved "https://registry.yarnpkg.com/expo-document-picker/-/expo-document-picker-55.0.16.tgz#5132afebd7b6235ea6a4a05fcb362db58b2314ce"
+  integrity sha512-qXDq531chim6GXDDEQb0Hx7XCx3A/Xe30yzJf1TZxuR8LVhd0TMA9EiiNRKd4PqtEDKwAzBXE/xKuE6Z6+WusA==
+
 expo-file-system@~55.0.11:
   version "55.0.11"
   resolved "https://registry.yarnpkg.com/expo-file-system/-/expo-file-system-55.0.11.tgz#9be75b499363d40f1329830c685f34e55710d987"
@@ -3878,6 +3890,18 @@ expo-haptics@~15.0.8:
   version "15.0.8"
   resolved "https://registry.yarnpkg.com/expo-haptics/-/expo-haptics-15.0.8.tgz#f93f895ac5d76fe0c5ac26b3644e1dbb097833f3"
   integrity sha512-lftutojy8Qs8zaDzzjwM3gKHFZ8bOOEZDCkmh2Ddpe95Ra6kt2izeOfOfKuP/QEh0MZ1j9TfqippyHdRd1ZM9g==
+
+expo-image-loader@~55.0.1:
+  version "55.0.1"
+  resolved "https://registry.yarnpkg.com/expo-image-loader/-/expo-image-loader-55.0.1.tgz#2c6bdae78e312d40aff12639c5d9a0189dbee6cf"
+  integrity sha512-o8gCo1j59XpXDh0/llgNYPcnfecYQhafQAO0yw5pb+kukPizvNoEqea8tFQIIQmNYqxd6Ljgs7lLXed0gXpOdQ==
+
+expo-image-picker@~55.0.23:
+  version "55.0.23"
+  resolved "https://registry.yarnpkg.com/expo-image-picker/-/expo-image-picker-55.0.23.tgz#d77b1d379c9f11bb6951001a6e683ee828503cb5"
+  integrity sha512-f4Ro596MbAVHivJLaJ36XrtWhucNJFByJL6CrZKd8Q8Sw+ACk0oRaBAAYSt/x2Ofw2YywKcMvoH2LX1cv4Q9ig==
+  dependencies:
+    expo-image-loader "~55.0.1"
 
 expo-image@^55.0.8:
   version "55.0.8"

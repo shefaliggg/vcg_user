@@ -28,7 +28,7 @@ const getErrorMessage = (error) => {
       return 'You don\'t have permission to perform this action.';
 
     case 409:
-      if (message.includes('email')) {
+      if (message?.toLowerCase().includes('email')) {
         return 'This email is already registered. Please login or use a different email.';
       }
       return 'This account already exists.';

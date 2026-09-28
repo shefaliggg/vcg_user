@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  TextInput,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
@@ -14,9 +13,11 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import userService from '../services/user.service';
 
-import { LinearGradient } from 'expo-linear-gradient';
 import AppText from '../components/AppText';
+import FormInput from '../components/FormInput';
 import { colors } from '../themes/colors';
+import { spacing } from '../themes/spacing';
+import { radius } from '../themes/radius';
 
 const ChangePasswordScreen = () => {
   const navigation = useNavigation();
@@ -32,6 +33,21 @@ const ChangePasswordScreen = () => {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  const validators = {
+    currentPassword: (v) => (!v.trim() ? 'Required' : null),
+    newPassword: (v) => {
+      if (!v.trim()) return 'Required';
+      if (v.length < 6) return 'Must be at least 6 characters';
+      return null;
+    },
+    confirmPassword: (v, data) => {
+      if (!v.trim()) return 'Required';
+      if (v !== data.newPassword) return 'Passwords do not match';
+      return null;
+    },
+  };
 
   useEffect(() => {
     loadUserData();
@@ -59,29 +75,32 @@ const ChangePasswordScreen = () => {
   };
 
   const handleChange = (field, value) => {
-    setFormData({ ...formData, [field]: value });
+    setFormData((prev) => {
+      const next = { ...prev, [field]: value };
+      if (errors[field] && !validators[field](value, next)) {
+        setErrors((prevErrors) => ({ ...prevErrors, [field]: undefined }));
+      }
+      // Re-check confirmPassword live when newPassword changes, so a
+      // previously-flagged mismatch clears as soon as they line up again.
+      if (field === 'newPassword' && errors.confirmPassword && !validators.confirmPassword(next.confirmPassword, next)) {
+        setErrors((prevErrors) => ({ ...prevErrors, confirmPassword: undefined }));
+      }
+      return next;
+    });
   };
 
   const handleChangePassword = async () => {
-    if (!formData.currentPassword.trim()) {
-      Alert.alert('Error', 'Current password is required');
-      return;
-    }
+    const nextErrors = {};
+    Object.keys(validators).forEach((field) => {
+      const message = validators[field](formData[field], formData);
+      if (message) nextErrors[field] = message;
+    });
 
-    if (!formData.newPassword.trim()) {
-      Alert.alert('Error', 'New password is required');
+    if (Object.keys(nextErrors).length > 0) {
+      setErrors(nextErrors);
       return;
     }
-
-    if (formData.newPassword.length < 6) {
-      Alert.alert('Error', 'New password must be at least 6 characters');
-      return;
-    }
-
-    if (formData.newPassword !== formData.confirmPassword) {
-      Alert.alert('Error', 'New passwords do not match');
-      return;
-    }
+    setErrors({});
 
     if (!user) {
       Alert.alert('Error', 'User data not loaded');
@@ -117,9 +136,8 @@ const ChangePasswordScreen = () => {
 
 
   return (
-    <LinearGradient
-      colors={[colors.gradientStart, colors.gradientEnd]}
-      style={{ flex: 1 }}
+    <View
+      style={{ flex: 1, backgroundColor: colors.primary }}
     >
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
@@ -132,10 +150,10 @@ const ChangePasswordScreen = () => {
             onPress={() => navigation.goBack()}
             style={styles.backButton}
           >
-            <Icon name="arrow-back" size={22} color="#fff" />
+            <Icon name="arrow-back" size={22} color={colors.white} />
           </TouchableOpacity>
 
-          <AppText weight="bold" style={styles.headerTitle}>
+          <AppText variant="screenTitle" style={styles.headerTitle}>
             Change Password
           </AppText>
 
@@ -145,91 +163,84 @@ const ChangePasswordScreen = () => {
         {/* Card */}
         <View style={styles.card}>
 
-          <AppText weight="bold" style={styles.sectionTitle}>
+          <AppText variant="sectionTitle" style={styles.sectionTitle}>
             Security
           </AppText>
 
           {/* Current Password */}
-          <View style={styles.inputGroup}>
-            <AppText style={styles.label}>Current Password *</AppText>
-
-            <View style={styles.passwordContainer}>
-              <TextInput
-                style={styles.passwordInput}
-                value={formData.currentPassword}
-                onChangeText={(v) => handleChange('currentPassword', v)}
-                placeholder="Enter current password"
-                placeholderTextColor="#94A3B8"
-                secureTextEntry={!showCurrentPassword}
-              />
-
+          <FormInput
+            label="Current Password"
+            required
+            value={formData.currentPassword}
+            onChangeText={(v) => handleChange('currentPassword', v)}
+            placeholder="Enter current password"
+            secureTextEntry={!showCurrentPassword}
+            error={errors.currentPassword}
+            rightElement={
               <TouchableOpacity
                 onPress={() => setShowCurrentPassword(!showCurrentPassword)}
               >
                 <Icon
                   name={showCurrentPassword ? 'visibility' : 'visibility-off'}
                   size={20}
-                  color="#64748B"
+                  color={colors.textMuted}
                 />
               </TouchableOpacity>
-            </View>
-          </View>
+            }
+          />
 
           {/* New Password */}
           <View style={styles.inputGroup}>
-            <AppText style={styles.label}>New Password *</AppText>
+            <FormInput
+              label="New Password"
+              required
+              value={formData.newPassword}
+              onChangeText={(v) => handleChange('newPassword', v)}
+              placeholder="Enter new password"
+              secureTextEntry={!showNewPassword}
+              error={errors.newPassword}
+              containerStyle={{ marginBottom: errors.newPassword ? spacing.sm : 0 }}
+              rightElement={
+                <TouchableOpacity
+                  onPress={() => setShowNewPassword(!showNewPassword)}
+                >
+                  <Icon
+                    name={showNewPassword ? 'visibility' : 'visibility-off'}
+                    size={20}
+                    color={colors.textMuted}
+                  />
+                </TouchableOpacity>
+              }
+            />
 
-            <View style={styles.passwordContainer}>
-              <TextInput
-                style={styles.passwordInput}
-                value={formData.newPassword}
-                onChangeText={(v) => handleChange('newPassword', v)}
-                placeholder="Enter new password"
-                placeholderTextColor="#94A3B8"
-                secureTextEntry={!showNewPassword}
-              />
-
-              <TouchableOpacity
-                onPress={() => setShowNewPassword(!showNewPassword)}
-              >
-                <Icon
-                  name={showNewPassword ? 'visibility' : 'visibility-off'}
-                  size={20}
-                  color="#64748B"
-                />
-              </TouchableOpacity>
-            </View>
-
-            <AppText style={styles.hint}>
-              Must be at least 6 characters
-            </AppText>
+            {!errors.newPassword && (
+              <AppText style={styles.hint}>
+                Must be at least 6 characters
+              </AppText>
+            )}
           </View>
 
           {/* Confirm Password */}
-          <View style={styles.inputGroup}>
-            <AppText style={styles.label}>Confirm New Password *</AppText>
-
-            <View style={styles.passwordContainer}>
-              <TextInput
-                style={styles.passwordInput}
-                value={formData.confirmPassword}
-                onChangeText={(v) => handleChange('confirmPassword', v)}
-                placeholder="Re-enter new password"
-                placeholderTextColor="#94A3B8"
-                secureTextEntry={!showConfirmPassword}
-              />
-
+          <FormInput
+            label="Confirm New Password"
+            required
+            value={formData.confirmPassword}
+            onChangeText={(v) => handleChange('confirmPassword', v)}
+            placeholder="Re-enter new password"
+            secureTextEntry={!showConfirmPassword}
+            error={errors.confirmPassword}
+            rightElement={
               <TouchableOpacity
                 onPress={() => setShowConfirmPassword(!showConfirmPassword)}
               >
                 <Icon
                   name={showConfirmPassword ? 'visibility' : 'visibility-off'}
                   size={20}
-                  color="#64748B"
+                  color={colors.textMuted}
                 />
               </TouchableOpacity>
-            </View>
-          </View>
+            }
+          />
 
           {/* Button */}
           <TouchableOpacity
@@ -238,9 +249,9 @@ const ChangePasswordScreen = () => {
             disabled={loading}
           >
             {loading ? (
-              <ActivityIndicator color="#fff" />
+              <ActivityIndicator color={colors.white} />
             ) : (
-              <AppText weight="bold" style={styles.saveText}>
+              <AppText variant="button" style={styles.saveText}>
                 Update Password
               </AppText>
             )}
@@ -248,14 +259,14 @@ const ChangePasswordScreen = () => {
 
         </View>
       </ScrollView>
-    </LinearGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   header: {
     marginTop: 60,
-    paddingHorizontal: 24,
+    paddingHorizontal: spacing.xl,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -263,65 +274,62 @@ const styles = StyleSheet.create({
   backButton: {
     width: 40,
     height: 40,
-    borderRadius: 12,
+    borderRadius: radius.button,
     backgroundColor: 'rgba(255,255,255,0.2)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   headerTitle: {
-    color: '#fff',
-    fontSize: 20,
+    color: colors.white,
   },
   card: {
-    backgroundColor: '#fff',
-    marginTop: 40,
-    borderTopLeftRadius: 32,
-    borderTopRightRadius: 32,
-    padding: 24,
+    backgroundColor: colors.surface,
+    marginTop: spacing.xxxl,
+    borderTopLeftRadius: radius.bottomSheet,
+    borderTopRightRadius: radius.bottomSheet,
+    padding: spacing.xl,
     flex: 1,
   },
   sectionTitle: {
-    fontSize: 16,
-    color: '#1E293B',
-    marginBottom: 20,
+    color: colors.text,
+    marginBottom: spacing.lg,
   },
   inputGroup: {
-    marginBottom: 20,
+    marginBottom: spacing.lg,
   },
   label: {
-    marginBottom: 6,
-    color: '#1E293B',
+    marginBottom: spacing.sm,
+    color: colors.text,
   },
   passwordContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F8FAFC',
-    borderRadius: 14,
-    paddingHorizontal: 16,
+    backgroundColor: colors.background,
+    borderRadius: radius.input,
+    paddingHorizontal: spacing.base,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: colors.border,
   },
   passwordInput: {
     flex: 1,
-    paddingVertical: 14,
+    paddingVertical: spacing.base,
     fontSize: 15,
-    color: '#1E293B',
+    color: colors.text,
   },
   hint: {
     fontSize: 12,
-    color: '#64748B',
-    marginTop: 6,
+    color: colors.textMuted,
+    marginTop: spacing.xs,
   },
   saveButton: {
-    backgroundColor: '#F0DBAF',
-    paddingVertical: 18,
-    borderRadius: 16,
+    backgroundColor: colors.primary,
+    paddingVertical: spacing.base,
+    borderRadius: radius.button,
     alignItems: 'center',
-    marginTop: 10,
+    marginTop: spacing.md,
   },
   saveText: {
-    color: '#fff',
-    fontSize: 16,
+    color: colors.white,
   },
   disabled: {
     opacity: 0.6,

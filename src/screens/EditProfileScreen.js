@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  TextInput,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
@@ -13,9 +12,13 @@ import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import userService from '../services/user.service';
-import { LinearGradient } from 'expo-linear-gradient';
 import AppText from '../components/AppText';
+import FormInput from '../components/FormInput';
 import { colors } from '../themes/colors';
+import { spacing } from '../themes/spacing';
+import { radius } from '../themes/radius';
+
+const PHONE_REGEX = /^[0-9()\-\s+]{7,}$/;
 
 
 const EditProfileScreen = () => {
@@ -32,6 +35,17 @@ const EditProfileScreen = () => {
   });
 
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  const validators = {
+    firstName: (v) => (!v.trim() ? 'Required' : null),
+    lastName: (v) => (!v.trim() ? 'Required' : null),
+    phone: (v) => {
+      if (!v.trim()) return 'Required';
+      if (!PHONE_REGEX.test(v.trim())) return 'Enter a valid phone number';
+      return null;
+    },
+  };
 
   useEffect(() => {
     loadUserData();
@@ -77,18 +91,23 @@ const EditProfileScreen = () => {
 
   const handleChange = (field, value) => {
     setFormData({ ...formData, [field]: value });
+    if (errors[field] && validators[field] && !validators[field](value)) {
+      setErrors((prev) => ({ ...prev, [field]: undefined }));
+    }
   };
 
   const handleSave = async () => {
-    if (!formData.firstName.trim() || !formData.lastName.trim()) {
-      Alert.alert('Error', 'First name and last name are required');
-      return;
-    }
+    const nextErrors = {};
+    Object.keys(validators).forEach((field) => {
+      const message = validators[field](formData[field]);
+      if (message) nextErrors[field] = message;
+    });
 
-    if (!formData.phone.trim()) {
-      Alert.alert('Error', 'Phone number is required');
+    if (Object.keys(nextErrors).length > 0) {
+      setErrors(nextErrors);
       return;
     }
+    setErrors({});
 
     try {
       setLoading(true);
@@ -126,9 +145,8 @@ const EditProfileScreen = () => {
 
 
   return (
-    <LinearGradient
-      colors={[colors.gradientStart, colors.gradientEnd]}
-      style={{ flex: 1 }}
+    <View
+      style={{ flex: 1, backgroundColor: colors.primary }}
     >
       <ScrollView
         contentContainerStyle={{ paddingBottom: 50 }}
@@ -141,7 +159,7 @@ const EditProfileScreen = () => {
             <Icon name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
 
-          <AppText weight="bold" style={styles.headerTitle}>
+          <AppText variant="sectionTitle" style={styles.headerTitle}>
             Edit Profile
           </AppText>
 
@@ -152,82 +170,64 @@ const EditProfileScreen = () => {
         <View style={styles.card}>
 
           {/* Personal Section */}
-          <AppText weight="bold" style={styles.sectionTitle}>
+          <AppText variant="sectionTitle" style={styles.sectionTitle}>
             Personal Details
           </AppText>
 
-          <View style={styles.inputGroup}>
-            <AppText style={styles.label}>First Name *</AppText>
-            <TextInput
-              style={styles.input}
-              value={formData.firstName}
-              onChangeText={(v) => handleChange('firstName', v)}
-              placeholder="Enter first name"
-              placeholderTextColor="#94A3B8"
-            />
-          </View>
+          <FormInput
+            label="First Name"
+            required
+            value={formData.firstName}
+            onChangeText={(v) => handleChange('firstName', v)}
+            placeholder="Enter first name"
+            error={errors.firstName}
+          />
 
-          <View style={styles.inputGroup}>
-            <AppText style={styles.label}>Last Name *</AppText>
-            <TextInput
-              style={styles.input}
-              value={formData.lastName}
-              onChangeText={(v) => handleChange('lastName', v)}
-              placeholder="Enter last name"
-              placeholderTextColor="#94A3B8"
-            />
-          </View>
+          <FormInput
+            label="Last Name"
+            required
+            value={formData.lastName}
+            onChangeText={(v) => handleChange('lastName', v)}
+            placeholder="Enter last name"
+            error={errors.lastName}
+          />
 
-          <View style={styles.inputGroup}>
-            <AppText style={styles.label}>Phone *</AppText>
-            <TextInput
-              style={styles.input}
-              value={formData.phone}
-              onChangeText={(v) => handleChange('phone', v)}
-              placeholder="Enter phone number"
-              keyboardType="phone-pad"
-              placeholderTextColor="#94A3B8"
-            />
-          </View>
+          <FormInput
+            label="Phone"
+            required
+            value={formData.phone}
+            onChangeText={(v) => handleChange('phone', v)}
+            placeholder="Enter phone number"
+            keyboardType="phone-pad"
+            error={errors.phone}
+          />
 
           {/* Company Section */}
-          <AppText weight="bold" style={[styles.sectionTitle, { marginTop: 24 }]}>
+          <AppText variant="sectionTitle" style={[styles.sectionTitle, { marginTop: 24 }]}>
             Company Details
           </AppText>
 
-          <View style={styles.inputGroup}>
-            <AppText style={styles.label}>Company Name</AppText>
-            <TextInput
-              style={styles.input}
-              value={formData.companyName}
-              onChangeText={(v) => handleChange('companyName', v)}
-              placeholder="Enter company name"
-              placeholderTextColor="#94A3B8"
-            />
-          </View>
+          <FormInput
+            label="Company Name"
+            value={formData.companyName}
+            onChangeText={(v) => handleChange('companyName', v)}
+            placeholder="Enter company name"
+          />
 
-          <View style={styles.inputGroup}>
-            <AppText style={styles.label}>GST Number</AppText>
-            <TextInput
-              style={styles.input}
-              value={formData.gstNumber}
-              onChangeText={(v) => handleChange('gstNumber', v)}
-              placeholder="Enter GST number"
-              autoCapitalize="characters"
-              placeholderTextColor="#94A3B8"
-            />
-          </View>
+          <FormInput
+            label="GST Number"
+            value={formData.gstNumber}
+            onChangeText={(v) => handleChange('gstNumber', v)}
+            placeholder="Enter GST number"
+            autoCapitalize="characters"
+          />
 
-          <View style={styles.inputGroup}>
-            <AppText style={styles.label}>Tax ID</AppText>
-            <TextInput
-              style={styles.input}
-              value={formData.taxId}
-              onChangeText={(v) => handleChange('taxId', v)}
-              placeholder="Enter tax ID"
-              placeholderTextColor="#94A3B8"
-            />
-          </View>
+          <FormInput
+            label="Tax ID"
+            value={formData.taxId}
+            onChangeText={(v) => handleChange('taxId', v)}
+            placeholder="Enter tax ID"
+          />
 
           {/* Save Button */}
           <TouchableOpacity
@@ -238,7 +238,7 @@ const EditProfileScreen = () => {
             {loading ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <AppText weight="bold" style={styles.saveText}>
+              <AppText variant="button" style={styles.saveText}>
                 Save Changes
               </AppText>
             )}
@@ -246,7 +246,7 @@ const EditProfileScreen = () => {
 
         </View>
       </ScrollView>
-    </LinearGradient>
+    </View>
   );
 }
 
@@ -261,19 +261,17 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     color: '#fff',
-    fontSize: 20,
   },
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     marginTop: 40,
-    borderTopLeftRadius: 32,
-    borderTopRightRadius: 32,
-    padding: 24,
-    
+    borderTopLeftRadius: radius.bottomSheet,
+    borderTopRightRadius: radius.bottomSheet,
+    padding: spacing.xl,
+
   },
   sectionTitle: {
-    fontSize: 16,
-    color: '#1E293B',
+    color: colors.text,
     marginBottom: 12,
   },
   inputGroup: {
@@ -281,28 +279,28 @@ const styles = StyleSheet.create({
   },
   label: {
     marginBottom: 6,
-    color: '#1E293B',
+    color: colors.text,
   },
   input: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 14,
+    backgroundColor: colors.background,
+    borderRadius: radius.input,
     paddingHorizontal: 16,
-    paddingVertical: 14,
+    height: 50,
     fontSize: 15,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
-    color: '#1E293B',
+    borderColor: colors.border,
+    color: colors.text,
   },
   saveButton: {
-    backgroundColor: '#F0DBAF',
-    paddingVertical: 18,
-    borderRadius: 16,
+    backgroundColor: colors.primary,
+    height: 50,
+    justifyContent: 'center',
+    borderRadius: radius.button,
     alignItems: 'center',
     marginTop: 20,
   },
   saveText: {
     color: '#fff',
-    fontSize: 16,
   },
   disabled: {
     opacity: 0.6,

@@ -6,11 +6,13 @@ import {
   ActivityIndicator,
   TouchableOpacity,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import AppText from "../components/AppText";
 import api from "../services/api.service";
 import { colors } from "../themes/colors";
+import { spacing } from "../themes/spacing";
+import { radius } from "../themes/radius";
+import { shadows } from "../themes/shadows";
 
 export default function NotificationScreen() {
   const [notifications, setNotifications] = useState([]);
@@ -34,23 +36,21 @@ export default function NotificationScreen() {
 
   if (loading) {
     return (
-      <LinearGradient
-        colors={[colors.gradientStart, colors.gradientEnd]}
-        style={styles.loadingContainer}
+      <View
+        style={[styles.loadingContainer, { backgroundColor: colors.primary }]}
       >
         <ActivityIndicator size="large" color="#fff" />
-      </LinearGradient>
+      </View>
     );
   }
 
   return (
-    <LinearGradient
-      colors={[colors.gradientStart, colors.gradientEnd]}
-      style={styles.container}
+    <View
+      style={[styles.container, { backgroundColor: colors.primary }]}
     >
       {/* Header */}
       <View style={styles.header}>
-        <AppText weight="bold" style={styles.headerTitle}>
+        <AppText variant="screenTitle" style={styles.headerTitle}>
           Notifications
         </AppText>
       </View>
@@ -65,7 +65,7 @@ export default function NotificationScreen() {
             <View style={styles.card}>
               <View style={styles.cardHeader}>
                 <Feather name="bell" size={18} color={colors.primary} />
-                <AppText weight="bold" style={styles.title}>
+                <AppText variant="cardTitle" style={styles.title}>
                   {item.title}
                 </AppText>
               </View>
@@ -74,14 +74,14 @@ export default function NotificationScreen() {
                 {item.body}
               </AppText>
 
-              <AppText style={styles.date}>
+              <AppText variant="caption" style={styles.date}>
                 {new Date(item.createdAt).toLocaleString()}
               </AppText>
             </View>
           )}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-              <Feather name="bell-off" size={40} color="#94A3B8" />
+              <Feather name="bell-off" size={40} color={colors.textMuted} />
               <AppText style={styles.emptyText}>
                 No notifications yet
               </AppText>
@@ -89,7 +89,7 @@ export default function NotificationScreen() {
           }
         />
       </View>
-    </LinearGradient>
+    </View>
   );
 }
 
@@ -106,56 +106,51 @@ const styles = StyleSheet.create({
 
   header: {
     paddingTop: 70,
-    paddingBottom: 20,
-    paddingHorizontal: 24,
+    paddingBottom: spacing.lg,
+    paddingHorizontal: spacing.xl,
   },
 
   headerTitle: {
-    fontSize: 26,
-    color: "#fff",
+    color: colors.white,
   },
 
   content: {
     flex: 1,
-    backgroundColor: "#F8FAFC",
-    borderTopLeftRadius: 32,
-    borderTopRightRadius: 32,
-    padding: 20,
+    backgroundColor: colors.background,
+    borderTopLeftRadius: radius.bottomSheet,
+    borderTopRightRadius: radius.bottomSheet,
+    padding: spacing.lg,
   },
 
   card: {
-    backgroundColor: "#fff",
-    padding: 18,
-    borderRadius: 18,
-    marginBottom: 15,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    elevation: 4,
+    backgroundColor: colors.surface,
+    padding: spacing.base,
+    borderRadius: radius.card,
+    marginBottom: spacing.base,
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...shadows.card,
   },
 
   cardHeader: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    marginBottom: 8,
+    gap: spacing.sm,
+    marginBottom: spacing.sm,
   },
 
   title: {
-    fontSize: 15,
-    color: "#1E293B",
+    color: colors.text,
   },
 
   body: {
     fontSize: 14,
-    color: "#475569",
+    color: colors.textMuted,
     marginBottom: 6,
   },
 
   date: {
-    fontSize: 12,
-    color: "#94A3B8",
+    color: colors.textMuted,
   },
 
   emptyContainer: {
@@ -164,7 +159,7 @@ const styles = StyleSheet.create({
   },
 
   emptyText: {
-    marginTop: 10,
-    color: "#94A3B8",
+    marginTop: spacing.sm,
+    color: colors.textMuted,
   },
 });

@@ -14,6 +14,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import authService from '../services/auth.service';
 import userService from '../services/user.service';
 import AppText from '../components/AppText';
+import { colors } from '../themes/colors';
+import { spacing } from '../themes/spacing';
+import { radius } from '../themes/radius';
+import { shadows } from '../themes/shadows';
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
@@ -78,7 +82,7 @@ const ProfileScreen = () => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#7ED7C1" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -101,7 +105,7 @@ return (
     </View>
 
     <View style={styles.section}>
-      <AppText weight="bold" style={styles.sectionTitle}>
+      <AppText variant="sectionTitle" style={styles.sectionTitle}>
         Personal Information
       </AppText>
 
@@ -165,7 +169,7 @@ return (
         style={styles.passwordButton}
         onPress={() => navigation.navigate("ChangePassword")}
       >
-        <Icon name="lock" size={20} color="#F0DBAF" style={styles.buttonIcon} />
+        <Icon name="lock" size={20} color={colors.primary} style={styles.buttonIcon} />
         <Text style={styles.passwordButtonText}>Change Password</Text>
       </TouchableOpacity>
 
@@ -184,17 +188,17 @@ return (
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F6F7FB',
+    backgroundColor: colors.background,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F5F5F5',
+    backgroundColor: colors.background,
   },
   header: {
-    backgroundColor: "#F0DBAF",
-    paddingTop: 70,
+    backgroundColor: colors.primary,
+    paddingTop: 24,
     paddingBottom: 30,
     alignItems: "center",
     borderBottomLeftRadius: 30,
@@ -203,7 +207,7 @@ const styles = StyleSheet.create({
   avatarContainer: {
     width: 90,
     height: 90,
-    borderRadius: 45,
+    borderRadius: radius.avatar,
     backgroundColor: "rgba(255,255,255,0.2)",
     justifyContent: "center",
     alignItems: "center",
@@ -221,21 +225,17 @@ const styles = StyleSheet.create({
     color: "rgba(255,255,255,0.85)",
   },
   section: {
-    backgroundColor: "#fff",
-    marginHorizontal: 16,
-    marginTop: 20,
-    borderRadius: 16,
+    backgroundColor: colors.surface,
+    marginHorizontal: spacing.base,
+    marginTop: spacing.lg,
+    borderRadius: radius.card,
     paddingVertical: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 3,
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...shadows.card,
   },
   sectionTitle: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#111827",
+    color: colors.text,
     paddingHorizontal: 16,
     marginBottom: 12,
   },
@@ -245,35 +245,31 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: "#F0F2F5",
+    borderBottomColor: colors.border,
   },
   label: {
     fontSize: 13,
-    color: "#6B7280",
+    color: colors.textMuted,
   },
 
   value: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#111827",
+    color: colors.text,
   },
   buttonSection: {
     paddingHorizontal: 16,
     paddingVertical: 24,
   },
   editButton: {
-    backgroundColor: "#F0DBAF",
+    backgroundColor: colors.primary,
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    paddingVertical: 16,
-    borderRadius: 14,
+    height: 50,
+    borderRadius: radius.button,
     marginBottom: 14,
-    shadowColor: "#F0DBAF",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
+    ...shadows.card,
   },
   buttonIcon: {
     marginRight: 8,
@@ -284,33 +280,33 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   passwordButton: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: "#F0DBAF",
+    borderColor: colors.primary,
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    paddingVertical: 16,
-    borderRadius: 14,
+    height: 50,
+    borderRadius: radius.button,
     marginBottom: 14,
   },
   passwordButtonText: {
-    color: "#F0DBAF",
+    color: colors.primary,
     fontSize: 15,
     fontWeight: "600",
   },
   logoutButton: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: "#DC2626",
+    borderColor: colors.error,
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    paddingVertical: 16,
-    borderRadius: 14,
+    height: 50,
+    borderRadius: radius.button,
   },
   logoutButtonText: {
-    color: "#DC2626",
+    color: colors.error,
     fontSize: 15,
     fontWeight: "600",
   },
