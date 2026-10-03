@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import authService from "../services/auth.service";
 import api from "../services/api.service";
+import chatService from "../services/chat.service";
 import AppText from "./AppText";
 import ShipperDrawer from "./ShipperDrawer";
 import { colors } from "../themes/colors";
@@ -17,6 +18,7 @@ export default function AppHeader({ title }) {
   const insets = useSafeAreaInsets();
   const [user, setUser] = useState(null);
   const [unread, setUnread] = useState(0);
+  const [unreadMessages, setUnreadMessages] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
 
   const fetchCount = useCallback(async () => {
@@ -28,17 +30,31 @@ export default function AppHeader({ title }) {
     }
   }, []);
 
+  const fetchMessageCount = useCallback(async () => {
+    try {
+      const data = await chatService.getUnreadCount();
+      setUnreadMessages(data.count);
+    } catch (err) {
+      console.log("Unread message count error:", err);
+    }
+  }, []);
+
   useFocusEffect(
     useCallback(() => {
       authService.getCurrentUser().then(setUser).catch(() => {});
       fetchCount();
-    }, [fetchCount])
+      fetchMessageCount();
+    }, [fetchCount, fetchMessageCount])
   );
 
   useEffect(() => {
     const listener = DeviceEventEmitter.addListener("refreshNotifications", fetchCount);
-    return () => listener.remove();
-  }, [fetchCount]);
+    const messageListener = DeviceEventEmitter.addListener("refreshMessages", fetchMessageCount);
+    return () => {
+      listener.remove();
+      messageListener.remove();
+    };
+  }, [fetchCount, fetchMessageCount]);
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -57,6 +73,11 @@ export default function AppHeader({ title }) {
           </TouchableOpacity>
           <TouchableOpacity onPress={() => navigation.navigate("Messages")} accessibilityLabel="Messages">
             <Feather name="message-circle" size={22} color={colors.text} />
+            {unreadMessages > 0 && (
+              <View style={styles.badge}>
+                <AppText weight="bold" style={styles.badgeText}>{unreadMessages > 99 ? "99+" : unreadMessages}</AppText>
+              </View>
+            )}
           </TouchableOpacity>
           <TouchableOpacity onPress={() => navigation.navigate("Notifications")} accessibilityLabel="Notifications">
             <Feather name="bell" size={22} color={colors.text} />

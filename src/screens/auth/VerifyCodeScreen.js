@@ -70,7 +70,9 @@ export default function VerifyCodeScreen({ navigation, route }) {
     try {
       const result = await authService.verifyOtp(channel, identifier, code);
       setVerified(true);
-      await registerForPushNotifications();
+      registerForPushNotifications().catch((error) => {
+        console.warn("Push notification registration failed:", error?.message);
+      });
 
       setTimeout(() => {
         const isNewUser = result.isNewUser;

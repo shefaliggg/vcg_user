@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation, useRoute } from "@react-navigation/native";
 import {
   View,
   FlatList,
@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   RefreshControl,
+  ScrollView,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -18,16 +19,35 @@ import { radius } from "../themes/radius";
 import { shadows } from "../themes/shadows";
 import { getLoadStage } from "../utils/loadStatus";
 
+// Same buckets as the dashboard's stat cards, plus "All" - tapping a stat card
+// deep-links here via route.params.filter using these same keys.
+const TABS = [
+  { key: "all", label: "All" },
+  { key: "active", label: "Active" },
+  { key: "OPEN_FOR_QUOTES", label: "Awaiting Driver" },
+  { key: "IN_PROGRESS", label: "In Transit" },
+  { key: "DELIVERED", label: "Delivered" },
+];
+
+const matchesTab = (b, tabKey) => {
+  if (tabKey === "all") return true;
+  if (tabKey === "active") return !b.isDraft && b.status !== "DELIVERED";
+  return b.status === tabKey;
+};
+
 export default function LoadsScreen() {
   const navigation = useNavigation();
+  const route = useRoute();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [tab, setTab] = useState(route.params?.filter || "all");
 
   useFocusEffect(
     useCallback(() => {
+      if (route.params?.filter) setTab(route.params.filter);
       fetchLoads();
-    }, [])
+    }, [route.params?.filter])
   );
 
   const fetchLoads = async () => {
@@ -61,7 +81,7 @@ export default function LoadsScreen() {
         onPress={() => navigation.navigate("LoadDetails", { bookingId: item._id })}
       >
         <View style={styles.cardTop}>
-          <AppText weight="semiBold" style={styles.loadId}>#{item._id?.slice(-6).toUpperCase()}</AppText>
+          <AppText weight="semiBold" style={styles.loadId}>{item.loadNumber || `#${item._id?.slice(-6).toUpperCase()}`}</AppText>
           <View style={[styles.statusPill, { backgroundColor: `${stage.color}1A` }]}>
             <AppText weight="semiBold" style={[styles.statusPillText, { color: stage.color }]}>
               {stage.label}
@@ -91,27 +111,65 @@ export default function LoadsScreen() {
     );
   };
 
+  const selectTab = (key) => {
+    setTab(key);
+    navigation.setParams({ filter: undefined });
+  };
+
+  const filteredBookings = bookings.filter((b) => matchesTab(b, tab));
+
   return (
     <SafeAreaView style={styles.container} edges={[]}>
-      {loading ? (
-        <View style={styles.centerContainer}>
-          <ActivityIndicator size="large" color={colors.primary} />
-        </View>
-      ) : bookings.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Feather name="package" size={48} color={colors.textMuted} />
-          <AppText weight="bold" style={styles.emptyTitle}>No loads yet</AppText>
-          <AppText style={styles.emptyText}>Tap Post Load at the top to add your first load</AppText>
-        </View>
-      ) : (
-        <FlatList
-          data={bookings}
-          renderItem={renderItem}
-          keyExtractor={(item) => item._id}
-          contentContainerStyle={styles.listContainer}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-        />
-      )}
+      <View style={styles.tabBar}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.tabBarContent}
+        >
+          {TABS.map((t) => {
+            const count = bookings.filter((b) => matchesTab(b, t.key)).length;
+            const active = tab === t.key;
+            return (
+              <TouchableOpacity
+                key={t.key}
+                style={[styles.tab, active && styles.tabActive]}
+                onPress={() => selectTab(t.key)}
+              >
+                <AppText weight="semiBold" style={[styles.tabText, active && styles.tabTextActive]}>
+                  {t.label} ({count})
+                </AppText>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+      </View>
+      <View style={styles.listArea}>
+        {loading ? (
+          <View style={styles.centerContainer}>
+            <ActivityIndicator size="large" color={colors.primary} />
+          </View>
+        ) : filteredBookings.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Feather name="package" size={48} color={colors.textMuted} />
+            <AppText weight="bold" style={styles.emptyTitle}>
+              {tab === "all" ? "No loads yet" : "No loads in this tab"}
+            </AppText>
+            <AppText style={styles.emptyText}>
+              {tab === "all"
+                ? "Tap Post Load at the top to add your first load"
+                : "Try a different tab to see other loads"}
+            </AppText>
+          </View>
+        ) : (
+          <FlatList
+            data={filteredBookings}
+            renderItem={renderItem}
+            keyExtractor={(item) => item._id}
+            contentContainerStyle={styles.listContainer}
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+          />
+        )}
+      </View>
     </SafeAreaView>
   );
 }
@@ -154,6 +212,43 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     padding: spacing.base,
+  },
+  tabBar: {
+    flexShrink: 0,
+    height: 52,
+    backgroundColor: colors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  tabBarContent: {
+    flexGrow: 1,
+    alignItems: "center",
+    paddingHorizontal: spacing.base,
+    gap: spacing.sm,
+  },
+  tab: {
+    justifyContent: "center",
+    paddingHorizontal: spacing.md,
+    height: 34,
+    borderRadius: radius.button,
+    backgroundColor: colors.background,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  tabActive: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  tabText: {
+    fontSize: 13,
+    lineHeight: 16,
+    color: colors.textMuted,
+  },
+  tabTextActive: {
+    color: colors.white,
+  },
+  listArea: {
+    flex: 1,
   },
   card: {
     backgroundColor: colors.surface,

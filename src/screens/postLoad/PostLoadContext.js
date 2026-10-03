@@ -184,7 +184,11 @@ export function useSubmitLoad(navigation) {
       setSubmitting(isDraft ? "draft" : "post");
       try {
         const result = await bookingService.createBooking(buildPayload(formData, isDraft));
-        navigation.navigate("PostLoadResult", { kind: isDraft ? "draft" : "posted", bookingId: result?.bookingId });
+        navigation.navigate("PostLoadResult", {
+          kind: isDraft ? "draft" : "posted",
+          bookingId: result?.bookingId,
+          loadNumber: result?.loadNumber,
+        });
       } catch (err) {
         setServerError(getErrorMessage(err));
       } finally {

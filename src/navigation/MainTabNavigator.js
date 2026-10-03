@@ -1,4 +1,5 @@
 import React from "react";
+import { Platform } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Feather } from "@expo/vector-icons";
 import HomeScreen from "../screens/HomeScreen";
@@ -42,9 +43,10 @@ export default function MainTabNavigator() {
         tabBarStyle: {
           backgroundColor: colors.surface,
           borderTopColor: colors.border,
-          height: 72,
-          paddingBottom: 12,
+          height: Platform.OS === "ios" ? 88 : 72,
+          paddingBottom: Platform.OS === "ios" ? 22 : 10,
           paddingTop: 8,
+          borderTopWidth: 1,
         },
         tabBarItemStyle: {
           paddingVertical: 2,

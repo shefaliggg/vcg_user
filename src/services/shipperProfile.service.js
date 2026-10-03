@@ -4,7 +4,7 @@ import api from "./api.service";
 // user.shipperOnboardingStep server-side. See TruckDoc/workflows/workflow-02-profile.html.
 
 const getStatus = async () => {
-  const res = await api.get("/users/me");
+  const res = await api.get("/users/me", { timeout: 8000 });
   return res.data.data;
 };
 

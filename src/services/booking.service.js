@@ -43,6 +43,11 @@ const driverAcceptRateConfirmation = async (bookingId, signatureUrl) => {
   return res.data;
 };
 
+const getInvoiceByBooking = async (bookingId) => {
+  const res = await api.get(`/invoices/by-booking/${bookingId}`);
+  return res.data;
+};
+
 
 export default {
   createBooking,
@@ -52,5 +57,6 @@ export default {
   selectQuote,
   userSignRateConfirmation,
   driverAcceptRateConfirmation,
-  
+  getInvoiceByBooking,
+
 };

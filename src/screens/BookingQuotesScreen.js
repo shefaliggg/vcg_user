@@ -23,9 +23,21 @@ import { shadows } from "../themes/shadows";
 
 const RATE_STATUS_META = {
   not_generated: { icon: "clock", color: colors.statusPending },
+  awaiting_admin_approval: { icon: "clock", color: colors.statusWarning },
+  awaiting_carrier_acknowledgment: { icon: "file-text", color: colors.statusWarning },
   awaiting_user_signature: { icon: "edit-3", color: colors.statusWarning },
   user_signed: { icon: "check-circle", color: colors.statusPending },
+  carrier_acknowledged: { icon: "check-circle", color: colors.statusSuccess },
   driver_accepted: { icon: "check-circle", color: colors.statusSuccess },
+};
+
+const RATE_STATUS_LABEL = {
+  awaiting_admin_approval: "AWAITING VCG REVIEW",
+  awaiting_carrier_acknowledgment: "AWAITING CARRIER ACKNOWLEDGMENT",
+  awaiting_user_signature: "AWAITING CARRIER ACKNOWLEDGMENT",
+  user_signed: "AWAITING CARRIER ACKNOWLEDGMENT",
+  carrier_acknowledged: "CARRIER ACKNOWLEDGED",
+  driver_accepted: "CARRIER ACKNOWLEDGED",
 };
 
 export default function BookingQuotesScreen({ route, navigation }) {
@@ -181,7 +193,7 @@ const selectedDriverName =
           <View style={styles.statusBadge}>
             <Feather name={rateStatusMeta.icon} size={12} color="#fff" />
             <AppText weight="semiBold" style={styles.statusText}>
-              {rateConfirmationStatus.toUpperCase().replace(/_/g, " ")}
+              {RATE_STATUS_LABEL[rateConfirmationStatus] || rateConfirmationStatus.toUpperCase().replace(/_/g, " ")}
             </AppText>
           </View>
         </>
@@ -195,7 +207,7 @@ const selectedDriverName =
             ${selectedPrice}
           </AppText>
           <AppText weight="semiBold" style={styles.statusInfo}>
-            Status: {rateConfirmationStatus.toUpperCase().replace(/_/g, " ")}
+            Status: {RATE_STATUS_LABEL[rateConfirmationStatus] || rateConfirmationStatus.toUpperCase().replace(/_/g, " ")}
           </AppText>
           {/* Show driver name if available */}
           <AppText weight="semiBold" style={styles.quotedBy}>
@@ -203,7 +215,7 @@ const selectedDriverName =
           </AppText>
           {/* Action Buttons */}
           <View style={styles.pdfButtonsRow}>
-            {booking.rateConfirmation?.pdfUrl  && rateConfirmationStatus !== "awaiting_user_signature" && (
+            {booking.rateConfirmation?.pdfUrl && (
               <TouchableOpacity
                 style={styles.viewPdfButton}
                 onPress={() => {
@@ -216,13 +228,17 @@ const selectedDriverName =
                 <AppText weight="semiBold" style={styles.viewPdfButtonText}>📄 View PDF</AppText>
               </TouchableOpacity>
             )}
-            {rateConfirmationStatus === "awaiting_user_signature" && (
-              <TouchableOpacity
-                style={styles.signButton}
-                onPress={() => navigation.navigate("Signature", { bookingId })}
-              >
-                <AppText weight="semiBold" style={styles.signButtonText}>✍️ Sign Now</AppText>
-              </TouchableOpacity>
+            {rateConfirmationStatus === "awaiting_admin_approval" && (
+              <View style={styles.waitingBox}>
+                <Feather name="clock" size={14} color={colors.statusWarning} />
+                <AppText weight="semiBold" style={styles.waitingText}>Accepted quote — awaiting VCG review</AppText>
+              </View>
+            )}
+            {rateConfirmationStatus === "awaiting_carrier_acknowledgment" && (
+              <View style={styles.waitingBox}>
+                <Feather name="clock" size={14} color={colors.statusWarning} />
+                <AppText weight="semiBold" style={styles.waitingText}>Confirmation sent — awaiting carrier acknowledgment</AppText>
+              </View>
             )}
             {rateConfirmationStatus === "not_generated" && (
               <View style={styles.waitingBox}>
@@ -233,7 +249,13 @@ const selectedDriverName =
             {rateConfirmationStatus === "user_signed" && (
               <View style={styles.waitingBox}>
                 <Feather name="check-circle" size={14} color={colors.statusWarning} />
-                <AppText weight="semiBold" style={styles.waitingText}>Signed - Waiting for driver acceptance</AppText>
+                <AppText weight="semiBold" style={styles.waitingText}>Legacy confirmation — awaiting carrier acknowledgment</AppText>
+              </View>
+            )}
+            {rateConfirmationStatus === "carrier_acknowledged" && (
+              <View style={styles.completedBox}>
+                <Feather name="check-circle" size={14} color={colors.statusSuccess} />
+                <AppText weight="semiBold" style={styles.completedText}>Carrier acknowledged — ready for pickup</AppText>
               </View>
             )}
             {rateConfirmationStatus === "driver_accepted" && (

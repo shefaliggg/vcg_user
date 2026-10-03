@@ -6,6 +6,8 @@ import {
   ActivityIndicator,
   TouchableOpacity,
 } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import AppText from "../components/AppText";
 import api from "../services/api.service";
@@ -15,6 +17,7 @@ import { radius } from "../themes/radius";
 import { shadows } from "../themes/shadows";
 
 export default function NotificationScreen() {
+  const navigation = useNavigation();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -36,21 +39,30 @@ export default function NotificationScreen() {
 
   if (loading) {
     return (
-      <View
-        style={[styles.loadingContainer, { backgroundColor: colors.primary }]}
-      >
-        <ActivityIndicator size="large" color="#fff" />
-      </View>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+            <Feather name="arrow-left" size={22} color={colors.text} />
+          </TouchableOpacity>
+          <AppText weight="bold" style={styles.headerTitle}>
+            Notifications
+          </AppText>
+        </View>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={colors.primary} />
+        </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <View
-      style={[styles.container, { backgroundColor: colors.primary }]}
-    >
+    <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <AppText variant="screenTitle" style={styles.headerTitle}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+          <Feather name="arrow-left" size={22} color={colors.text} />
+        </TouchableOpacity>
+        <AppText weight="bold" style={styles.headerTitle}>
           Notifications
         </AppText>
       </View>
@@ -62,7 +74,15 @@ export default function NotificationScreen() {
           keyExtractor={(item) => item._id}
           showsVerticalScrollIndicator={false}
           renderItem={({ item }) => (
-            <View style={styles.card}>
+            <TouchableOpacity
+              style={styles.card}
+              disabled={!item.data?.bookingId}
+              onPress={() =>
+                navigation.navigate("LoadDetails", {
+                  bookingId: item.data.bookingId,
+                })
+              }
+            >
               <View style={styles.cardHeader}>
                 <Feather name="bell" size={18} color={colors.primary} />
                 <AppText variant="cardTitle" style={styles.title}>
@@ -77,7 +97,7 @@ export default function NotificationScreen() {
               <AppText variant="caption" style={styles.date}>
                 {new Date(item.createdAt).toLocaleString()}
               </AppText>
-            </View>
+            </TouchableOpacity>
           )}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
@@ -89,13 +109,14 @@ export default function NotificationScreen() {
           }
         />
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: colors.background,
   },
 
   loadingContainer: {
@@ -105,20 +126,26 @@ const styles = StyleSheet.create({
   },
 
   header: {
-    paddingTop: 70,
-    paddingBottom: spacing.lg,
-    paddingHorizontal: spacing.xl,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.base,
+    backgroundColor: colors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
   },
 
+  backBtn: { width: 34 },
+
   headerTitle: {
-    color: colors.white,
+    flex: 1,
+    fontSize: 17,
+    color: colors.text,
   },
 
   content: {
     flex: 1,
     backgroundColor: colors.background,
-    borderTopLeftRadius: radius.bottomSheet,
-    borderTopRightRadius: radius.bottomSheet,
     padding: spacing.lg,
   },
 

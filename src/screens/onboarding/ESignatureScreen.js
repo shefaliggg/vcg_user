@@ -61,7 +61,7 @@ export default function ESignatureScreen({ navigation }) {
             {agreed && <Feather name="check" size={14} color={colors.white} />}
           </View>
           <AppText style={styles.checkboxLabel}>
-            I agree to VCG Transport Terms &amp; Conditions and Privacy Policy.
+            I agree to CP Transport Terms &amp; Conditions and Privacy Policy.
           </AppText>
         </TouchableOpacity>
 

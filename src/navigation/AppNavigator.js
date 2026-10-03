@@ -18,9 +18,9 @@ import PostLoadReviewScreen from "../screens/postLoad/PostLoadReviewScreen";
 import PostLoadResultScreen from "../screens/postLoad/PostLoadResultScreen";
 import BookingQuotesScreen from "../screens/BookingQuotesScreen";
 import LoadDetailsScreen from "../screens/LoadDetailsScreen";
-import SignatureScreen from "../screens/SignatureScreen";
 import MyBookingsScreen from "../screens/MyBookingsScreen";
 import TrackingScreen from "../screens/TrackingScreen";
+import ChatScreen from "../screens/ChatScreen";
 import InvoiceScreen from "../screens/InvoiceScreen";
 import RatingScreen from "../screens/RatingScreen";
 import ProfileScreen from "../screens/ProfileScreen";
@@ -204,11 +204,6 @@ export default function AppNavigator() {
           options={{ title: "Load Details", headerShown: false }}
         />
         <Stack.Screen
-          name="Signature"
-          component={SignatureScreen}
-          options={{ title: "Sign Document" ,headerShown:false}}
-        />
-        <Stack.Screen
           name="MyBookings"
           component={MyBookingsScreen}
           options={{ title: "Bookings",headerShown: false }}
@@ -218,6 +213,11 @@ export default function AppNavigator() {
           name="Tracking"
           component={TrackingScreen}
           options={{ title: "Track Shipment",headerShown: false }}
+        />
+        <Stack.Screen
+          name="Chat"
+          component={ChatScreen}
+          options={{ title: "Chat", headerShown: false }}
         />
         <Stack.Screen
           name="Notifications"

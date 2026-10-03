@@ -24,6 +24,7 @@ import { shadows } from "../themes/shadows";
 
 // Real Booking.status enum (backend): OPEN_FOR_QUOTES, CONFIRMED, ACCEPTED, IN_PROGRESS, DELIVERED
 const STATUS_LABEL = {
+  PENDING_APPROVAL: "Pending Admin Review",
   OPEN_FOR_QUOTES: "Posted",
   CONFIRMED: "Driver Assigned",
   ACCEPTED: "Pickup Pending",
@@ -39,7 +40,7 @@ const STATUS_COLOR = {
   DELIVERED: colors.textMuted,
 };
 
-const loadIdOf = (booking) => `#${booking._id?.slice(-6).toUpperCase()}`;
+const loadIdOf = (booking) => booking.loadNumber || `#${booking._id?.slice(-6).toUpperCase()}`;
 const driverNameOf = (booking) => {
   const u = booking.driverId?.userId;
   return u ? `${u.firstName || ""} ${u.lastName || ""}`.trim() || "Assigned" : null;
@@ -86,6 +87,15 @@ export default function HomeScreen() {
 
   useEffect(() => {
     const listener = DeviceEventEmitter.addListener("refreshNotifications", fetchCount);
+    return () => listener.remove();
+  }, []);
+
+  useEffect(() => {
+    const listener = DeviceEventEmitter.addListener("openNotification", (data) => {
+      if (data?.bookingId) {
+        navigation.navigate("LoadDetails", { bookingId: data.bookingId });
+      }
+    });
     return () => listener.remove();
   }, []);
 
@@ -167,15 +177,15 @@ export default function HomeScreen() {
         id: `${b._id}-driver`,
         icon: pickupAt && pickupAt < now ? "clock" : "user-x",
         text: pickupAt && pickupAt < now
-          ? `Pickup date passed with no driver - Load ${loadIdOf(b)}`
-          : `No driver assigned yet - Load ${loadIdOf(b)}`,
+          ? `Pickup date passed with no driver - ${loadIdOf(b)}`
+          : `No driver assigned yet - ${loadIdOf(b)}`,
         bookingId: b._id,
       });
     } else if (pickupAt && b.status !== "IN_PROGRESS" && pickupAt > now && pickupAt - now <= DAY) {
-      attention.push({ id: `${b._id}-soon`, icon: "calendar", text: `Pickup within 24h - Load ${loadIdOf(b)}`, bookingId: b._id });
+      attention.push({ id: `${b._id}-soon`, icon: "calendar", text: `Pickup within 24h - ${loadIdOf(b)}`, bookingId: b._id });
     }
     if (b.deliveryDate && new Date(b.deliveryDate).getTime() < now) {
-      attention.push({ id: `${b._id}-delivery`, icon: "alert-triangle", text: `Delivery delayed - Load ${loadIdOf(b)}`, bookingId: b._id });
+      attention.push({ id: `${b._id}-delivery`, icon: "alert-triangle", text: `Delivery delayed - ${loadIdOf(b)}`, bookingId: b._id });
     }
   });
   activity.forEach((n) => {
@@ -193,14 +203,14 @@ export default function HomeScreen() {
   // merged with notifications so it reads: load posted, driver assigned, ...
   const lifecycleEvents = [];
   postedBookings.forEach((b) => {
-    lifecycleEvents.push({ id: `${b._id}-posted`, title: `Load ${loadIdOf(b)} posted`, at: b.createdAt, icon: "upload" });
+    lifecycleEvents.push({ id: `${b._id}-posted`, title: `${loadIdOf(b)} posted`, at: b.createdAt, icon: "upload" });
     const changedAt = b.updatedAt || b.createdAt;
     if (b.status === "CONFIRMED" || b.status === "ACCEPTED") {
-      lifecycleEvents.push({ id: `${b._id}-assigned`, title: `Driver assigned - Load ${loadIdOf(b)}`, body: driverNameOf(b) || undefined, at: changedAt, icon: "user-check" });
+      lifecycleEvents.push({ id: `${b._id}-assigned`, title: `Driver assigned - ${loadIdOf(b)}`, body: driverNameOf(b) || undefined, at: changedAt, icon: "user-check" });
     } else if (b.status === "IN_PROGRESS") {
-      lifecycleEvents.push({ id: `${b._id}-started`, title: `Shipment started - Load ${loadIdOf(b)}`, at: changedAt, icon: "truck" });
+      lifecycleEvents.push({ id: `${b._id}-started`, title: `Shipment started - ${loadIdOf(b)}`, at: changedAt, icon: "truck" });
     } else if (b.status === "DELIVERED") {
-      lifecycleEvents.push({ id: `${b._id}-delivered`, title: `Delivery completed - Load ${loadIdOf(b)}`, at: changedAt, icon: "check-circle" });
+      lifecycleEvents.push({ id: `${b._id}-delivered`, title: `Delivery completed - ${loadIdOf(b)}`, at: changedAt, icon: "check-circle" });
     }
   });
   const recentActivity = [
@@ -224,10 +234,34 @@ export default function HomeScreen() {
 
         {/* OVERVIEW */}
         <View style={styles.statsGrid}>
-          <StatCard label="Active Loads" value={activeLoads.length} icon="package" color={colors.primary} />
-          <StatCard label="Awaiting Driver" value={pendingLoads.length} icon="clock" color={colors.warning} />
-          <StatCard label="In Transit" value={inTransit.length} icon="truck" color={colors.success} />
-          <StatCard label="Delivered" value={delivered.length} icon="check-circle" color={colors.textMuted} />
+          <StatCard
+            label="Active Loads"
+            value={activeLoads.length}
+            icon="package"
+            color={colors.primary}
+            onPress={() => navigation.navigate("Loads", { filter: "active" })}
+          />
+          <StatCard
+            label="Awaiting Driver"
+            value={pendingLoads.length}
+            icon="clock"
+            color={colors.warning}
+            onPress={() => navigation.navigate("Loads", { filter: "OPEN_FOR_QUOTES" })}
+          />
+          <StatCard
+            label="In Transit"
+            value={inTransit.length}
+            icon="truck"
+            color={colors.success}
+            onPress={() => navigation.navigate("Loads", { filter: "IN_PROGRESS" })}
+          />
+          <StatCard
+            label="Delivered"
+            value={delivered.length}
+            icon="check-circle"
+            color={colors.textMuted}
+            onPress={() => navigation.navigate("Loads", { filter: "DELIVERED" })}
+          />
         </View>
 
         {/* QUICK ACTIONS */}
@@ -247,7 +281,7 @@ export default function HomeScreen() {
             return (
               <View key={b._id} style={styles.shipmentCard}>
                 <View style={styles.shipmentTop}>
-                  <AppText weight="bold" style={styles.shipmentId}>Load {loadIdOf(b)}</AppText>
+                  <AppText weight="bold" style={styles.shipmentId}>{loadIdOf(b)}</AppText>
                   <View style={[styles.statusPill, { backgroundColor: `${statusColor}1A` }]}>
                     <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
                     <AppText weight="semiBold" style={[styles.statusPillText, { color: statusColor }]}>
@@ -266,7 +300,11 @@ export default function HomeScreen() {
 
                 <TouchableOpacity
                   style={[styles.cardButton, b.status === "IN_PROGRESS" && styles.cardButtonPrimary]}
-                  onPress={() => navigation.navigate("Tracking", { bookingId: b._id })}
+                  onPress={() =>
+                    b.status === "IN_PROGRESS"
+                      ? navigation.navigate("Tracking", { bookingId: b._id })
+                      : navigation.navigate("LoadDetails", { bookingId: b._id })
+                  }
                 >
                   <AppText
                     weight="semiBold"
@@ -294,7 +332,7 @@ export default function HomeScreen() {
                 key={a.id}
                 style={styles.alertRow}
                 disabled={!a.bookingId}
-                onPress={() => navigation.navigate("Tracking", { bookingId: a.bookingId })}
+                onPress={() => navigation.navigate("LoadDetails", { bookingId: a.bookingId })}
               >
                 <View style={styles.alertIcon}>
                   <Feather name={a.icon} size={16} color={colors.error} />
@@ -316,14 +354,14 @@ export default function HomeScreen() {
               <TouchableOpacity
                 key={b._id}
                 style={[styles.listRow, i > 0 && styles.listRowDivider]}
-                onPress={() => navigation.navigate("Tracking", { bookingId: b._id })}
+                onPress={() => navigation.navigate("LoadDetails", { bookingId: b._id })}
               >
                 <View style={[styles.rowIcon, { backgroundColor: colors.primaryLight }]}>
                   <Feather name="calendar" size={16} color={colors.primary} />
                 </View>
                 <View style={{ flex: 1 }}>
                   <AppText weight="semiBold" style={styles.activityTitle} numberOfLines={1}>
-                    Load {loadIdOf(b)} · {driverNameOf(b) || "Unassigned"}
+                    {loadIdOf(b)} · {driverNameOf(b) || "Unassigned"}
                   </AppText>
                   <AppText style={styles.activityBody} numberOfLines={1}>
                     {b.pickupLocation?.address || "N/A"}
@@ -366,9 +404,9 @@ export default function HomeScreen() {
   );
 }
 
-function StatCard({ label, value, icon, color }) {
+function StatCard({ label, value, icon, color, onPress }) {
   return (
-    <View style={styles.statCard}>
+    <TouchableOpacity style={styles.statCard} onPress={onPress} activeOpacity={0.7}>
       <View style={[styles.statIconWrapper, { backgroundColor: `${color}1A` }]}>
         <Feather name={icon} size={18} color={color} />
       </View>
@@ -376,7 +414,7 @@ function StatCard({ label, value, icon, color }) {
         <AppText weight="bold" style={styles.statValue}>{value}</AppText>
         <AppText style={styles.statLabel} numberOfLines={1}>{label}</AppText>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 

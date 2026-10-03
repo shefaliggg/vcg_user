@@ -49,7 +49,7 @@ export default function TrackingOverviewScreen() {
     try {
       const data = await bookingService.getMyBookings();
       // Only shipments a shipper would actually want to track live.
-      setBookings(data.filter((b) => b.status !== "DELIVERED" && b.status !== "OPEN_FOR_QUOTES"));
+      setBookings(data.filter((b) => !["DELIVERED", "OPEN_FOR_QUOTES", "PENDING_APPROVAL"].includes(b.status)));
     } catch (error) {
       console.error("Failed to fetch active shipments:", error);
     } finally {
@@ -75,7 +75,7 @@ export default function TrackingOverviewScreen() {
       onPress={() => navigation.navigate("Tracking", { bookingId: item._id })}
     >
       <View style={styles.cardTop}>
-        <AppText weight="semiBold" style={styles.loadId}>#{item._id?.slice(-6).toUpperCase()}</AppText>
+        <AppText weight="semiBold" style={styles.loadId}>{item.loadNumber || `#${item._id?.slice(-6).toUpperCase()}`}</AppText>
         <View style={[styles.statusPill, { backgroundColor: `${STATUS_COLOR[item.status] || colors.statusNeutral}1A` }]}>
           <AppText weight="semiBold" style={[styles.statusPillText, { color: STATUS_COLOR[item.status] || colors.statusNeutral }]}>
             {STATUS_LABEL[item.status] || item.status}
